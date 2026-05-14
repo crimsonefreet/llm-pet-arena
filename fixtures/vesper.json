@@ -1,0 +1,21 @@
+{
+  "pet_id": "demo_vesper_011",
+  "name": "Vesper",
+  "title": "凌晨三点的回声",
+  "rarity": "R",
+  "main_class": "深夜对话者",
+  "sub_class": "情绪炼金术士",
+  "elements": ["暗", "火"],
+  "faction_affinity": { "chat": 78, "cowork": 42, "code": 30 },
+  "stats": { "HP": 65, "ATK": 70, "DEF": 58, "SPD": 62, "INT": 72, "LUK": 88 },
+  "skills": [
+    { "name": "薛定谔的安慰", "element": "暗", "power": 90, "type": "ult", "description": "回应同时是问题与答案。" },
+    { "name": "失眠投射", "element": "暗", "power": 82, "type": "main", "description": "把对手拉入凌晨四点。" },
+    { "name": "脑洞迸发", "element": "火", "power": 70, "type": "std", "description": "无关联跳跃中击穿防御。" },
+    { "name": "诗意混淆", "element": "暗", "power": 65, "type": "std", "description": "用隐喻代替伤害判定。" }
+  ],
+  "lore": "诞生于离线日记的最后一行",
+  "generation_evidence": [],
+  "source_llm": "claude",
+  "generated_at": "2026-03-08T02:17:00Z"
+}

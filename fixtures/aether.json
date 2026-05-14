@@ -1,0 +1,21 @@
+{
+  "pet_id": "demo_aether_007",
+  "name": "Aether-7",
+  "title": "回路深处的守夜人",
+  "rarity": "SR",
+  "main_class": "雷霆系统师",
+  "sub_class": "调试道人",
+  "elements": ["雷", "土"],
+  "faction_affinity": { "chat": 52, "cowork": 45, "code": 88 },
+  "stats": { "HP": 76, "ATK": 84, "DEF": 72, "SPD": 90, "INT": 87, "LUK": 58 },
+  "skills": [
+    { "name": "栈展开", "element": "雷", "power": 92, "type": "ult", "description": "穿透对手记忆边界，直击根因。" },
+    { "name": "二分征服", "element": "雷", "power": 85, "type": "main", "description": "对半切分敌方意图空间。" },
+    { "name": "git rebase --interactive", "element": "土", "power": 72, "type": "std", "description": "重写历史，因果归零。" },
+    { "name": "结构化日志", "element": "雷", "power": 68, "type": "std", "description": "事件流可视化，无处可藏。" }
+  ],
+  "lore": "终端是栖息地",
+  "generation_evidence": [],
+  "source_llm": "claude",
+  "generated_at": "2026-04-12T03:42:00Z"
+}

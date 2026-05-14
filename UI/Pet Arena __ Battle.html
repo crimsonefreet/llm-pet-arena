@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)file:///C:/Users/dingn/Downloads/battle.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Pet Arena // Battle</title>
+<link href="./Pet Arena __ Battle_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e0a;
+    --green: #33ff66;
+    --green-dim: #1a8033;
+    --green-faint: #0d4019;
+    --amber: #ffb000;
+    --red: #ff3355;
+    --cyan: #5ac8e8;
+    --text: #c8ffc8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #000;
+    min-height: 100vh;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* control bar */
+  .controls {
+    width: 1080px;
+    max-width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .btn {
+    background: transparent;
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .btn:hover {
+    background: var(--green-faint);
+    border-color: var(--green);
+    text-shadow: 0 0 6px currentColor;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .crt {
+    width: 1080px;
+    max-width: 100%;
+    background:
+      radial-gradient(ellipse at center, #0a1a0d 0%, #050805 90%),
+      var(--bg);
+    position: relative;
+    padding: 32px 40px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    overflow: hidden;
+    border: 2px solid var(--green-dim);
+    box-shadow: 0 0 60px rgba(51,255,102,0.15), inset 0 0 80px rgba(0,0,0,0.6);
+    min-height: 720px;
+  }
+  /* scanlines */
+  .crt::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.18) 3px,
+      rgba(0,0,0,0) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+  .crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(51,255,102,0.06), transparent 70%);
+    pointer-events: none;
+    z-index: 99;
+  }
+  .glow { text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .red { color: var(--red); }
+  .cyan { color: var(--cyan); }
+  .dim { color: var(--green-dim); }
+
+  /* topbar */
+  .topbar {
+    border: 1px solid var(--green-dim);
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 18px;
+    background: rgba(51,255,102,0.04);
+    letter-spacing: 0.1em;
+  }
+  .blink::after {
+    content: "_";
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* fighters */
+  .arena {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 18px;
+  }
+  .fighter {
+    border: 1px solid var(--green-dim);
+    padding: 14px 16px;
+    background: rgba(51,255,102,0.03);
+    position: relative;
+    transition: all 0.3s;
+  }
+  .fighter.acting {
+    border-color: var(--amber);
+    background: rgba(255,176,0,0.06);
+    box-shadow: 0 0 20px rgba(255,176,0,0.3);
+  }
+  .fighter.taking-hit {
+    animation: shake 0.4s;
+    border-color: var(--red);
+  }
+  .fighter.fainted {
+    opacity: 0.4;
+    border-color: var(--green-faint);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .fighter h3 {
+    font-family: 'VT323', monospace;
+    font-size: 32px;
+    color: var(--green);
+    text-shadow: 0 0 6px rgba(51,255,102,0.5);
+    margin-bottom: 2px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .fighter .ftitle {
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .fighter .fmeta {
+    font-size: 10px;
+    color: var(--green-dim);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+  .hpbar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  .hpbar-row .lbl { width: 26px; color: var(--green); font-weight: 700; }
+  .hpbar-row .bar {
+    flex: 1;
+    height: 12px;
+    background: var(--green-faint);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--green-dim);
+  }
+  .hpbar-row .fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    transition: width 0.6s ease-out;
+  }
+  .hpbar-row .fill.warn { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .hpbar-row .fill.danger { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .hpbar-row .num { width: 60px; text-align: right; font-weight: 700; font-size: 12px; }
+
+  .stat-mini {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 10px;
+  }
+  .stat-mini > div {
+    display: flex;
+    justify-content: space-between;
+    color: var(--green-dim);
+  }
+  .stat-mini > div b { color: var(--text); font-weight: 700; }
+
+  .vs-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+  .vs-block .vs {
+    font-family: 'VT323', monospace;
+    font-size: 56px;
+    color: var(--amber);
+    text-shadow: 0 0 12px var(--amber);
+    line-height: 1;
+  }
+  .vs-block .round {
+    font-size: 10px;
+    color: var(--green-dim);
+    letter-spacing: 0.2em;
+    margin-top: 4px;
+  }
+  .vs-block .round-num {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  /* damage popup */
+  .dmg-pop {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'VT323', monospace;
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--red);
+    text-shadow: 0 0 12px var(--red), 0 0 24px var(--red);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 50;
+  }
+  .dmg-pop.show {
+    animation: dmgFloat 1.2s ease-out forwards;
+  }
+  .dmg-pop.crit { color: var(--amber); text-shadow: 0 0 16px var(--amber); }
+  @keyframes dmgFloat {
+    0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
+    80% { opacity: 1; transform: translate(-50%, -50px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -80px) scale(0.9); }
+  }
+
+  /* skill banner */
+  .skill-banner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.85);
+    border: 2px solid var(--amber);
+    padding: 16px 28px;
+    z-index: 80;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 0 0 40px rgba(255,176,0,0.4);
+  }
+  .skill-banner.show {
+    animation: bannerShow 1.4s ease-out forwards;
+  }
+  .skill-banner .skby {
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .skill-banner .skname {
+    font-family: 'VT323', monospace;
+    font-size: 36px;
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green);
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1;
+  }
+  .skill-banner .skinfo {
+    font-size: 10px;
+    color: var(--text);
+    letter-spacing: 0.15em;
+    margin-top: 6px;
+    text-align: center;
+  }
+  @keyframes bannerShow {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    25% { transform: translate(-50%, -50%) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  /* element badge */
+  .ebadge {
+    display: inline-block;
+    padding: 1px 6px;
+    border: 1px solid currentColor;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+  .e-gold { color: var(--amber); }
+  .e-dark { color: #b266ff; }
+  .e-fire { color: var(--red); }
+  .e-water { color: var(--cyan); }
+  .e-earth { color: #d4a72c; }
+
+  /* battle log */
+  .log-section {
+    border-top: 1px dashed var(--green-dim);
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+  .log-header {
+    font-size: 10px;
+    color: var(--green-dim);
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .log {
+    height: 240px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--green-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .log::-webkit-scrollbar { width: 6px; }
+  .log::-webkit-scrollbar-track { background: transparent; }
+  .log::-webkit-scrollbar-thumb { background: var(--green-dim); }
+  .log p {
+    margin-bottom: 2px;
+    opacity: 0;
+    animation: logIn 0.3s ease-out forwards;
+  }
+  .log p .prompt { color: var(--green-dim); margin-right: 8px; }
+  .log p .hl-tessera { color: var(--cyan); font-weight: 700; }
+  .log p .hl-aether { color: #b266ff; font-weight: 700; }
+  .log p.round-marker {
+    color: var(--amber);
+    border-bottom: 1px dashed var(--green-faint);
+    padding-bottom: 4px;
+    margin: 8px 0 4px;
+    letter-spacing: 0.1em;
+  }
+  .log p.crit { color: var(--amber); text-shadow: 0 0 4px var(--amber); }
+  .log p.victory { color: var(--green); text-shadow: 0 0 6px var(--green); font-size: 14px; font-weight: 700; }
+  @keyframes logIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* result overlay */
+  .result-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .result-overlay.show {
+    display: flex;
+    animation: fadeIn 0.6s ease-out;
+  }
+  .result-overlay .rbox {
+    text-align: center;
+    border: 2px solid var(--amber);
+    padding: 28px 56px;
+    background: rgba(0,0,0,0.9);
+    box-shadow: 0 0 60px rgba(255,176,0,0.4);
+  }
+  .result-overlay .rby {
+    font-size: 12px;
+    color: var(--green-dim);
+    letter-spacing: 0.3em;
+    margin-bottom: 8px;
+  }
+  .result-overlay .rwin {
+    font-family: 'VT323', monospace;
+    font-size: 88px;
+    color: var(--amber);
+    text-shadow: 0 0 16px var(--amber);
+    letter-spacing: 0.1em;
+    line-height: 0.9;
+  }
+  .result-overlay .rname {
+    font-size: 16px;
+    color: var(--cyan);
+    margin-top: 8px;
+    letter-spacing: 0.1em;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* speed indicator dot */
+  .turn-indicator {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+    opacity: 0;
+  }
+  .fighter.acting .turn-indicator { opacity: 1; animation: pulse 0.6s infinite; }
+  @keyframes pulse { 50% { opacity: 0.4; } }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="btn" id="startBtn">▶ START BATTLE</button>
+  <button class="btn" id="resetBtn" disabled="">⟳ RESET</button>
+  <button class="btn" id="speedBtn">⚡ SPEED: 1×</button>
+</div>
+
+<div class="crt" id="arena">
+  <div class="topbar">
+    <span>PET-ARENA :: BATTLE-MODE v0.1</span>
+    <span class="blink" id="status">AWAITING BATTLE</span>
+  </div>
+
+  <div class="arena">
+    <div class="fighter" id="p1">
+      <div class="turn-indicator"></div>
+      <h3 class="glow">TESSERA</h3>
+      <div class="ftitle">尽调炼狱的执灯人</div>
+      <div class="fmeta">SSR · 金融术士 · <span class="ebadge e-gold">金</span><span class="ebadge e-dark">暗</span></div>
+      <div class="hpbar-row">
+        <span class="lbl">HP</span>
+        <div class="bar"><div class="fill" id="p1hp" style="width:100%"></div></div>
+        <span class="num" id="p1num">320 / 320</span>
+      </div>
+      <div class="stat-mini">
+        <div>ATK <b>82</b></div>
+        <div>DEF <b>94</b></div>
+        <div>SPD <b>70</b></div>
+      </div>
+    </div>
+
+    <div class="vs-block">
+      <div class="vs glow">VS</div>
+      <div class="round">ROUND</div>
+      <div class="round-num" id="roundNum">—</div>
+    </div>
+
+    <div class="fighter" id="p2">
+      <div class="turn-indicator"></div>
+      <h3 class="glow">AETHER-7</h3>
+      <div class="ftitle">递归调试者</div>
+      <div class="fmeta">SR · 代码骑士 · <span class="ebadge e-earth">土</span></div>
+      <div class="hpbar-row">
+        <span class="lbl">HP</span>
+        <div class="bar"><div class="fill" id="p2hp" style="width:100%"></div></div>
+        <span class="num" id="p2num">280 / 280</span>
+      </div>
+      <div class="stat-mini">
+        <div>ATK <b>76</b></div>
+        <div>DEF <b>72</b></div>
+        <div>SPD <b>85</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dmg-pop" id="dmgPop"></div>
+  <div class="skill-banner" id="banner">
+    <div class="skby" id="bnrBy">TESSERA USES</div>
+    <div class="skname" id="bnrName">SKILL NAME</div>
+    <div class="skinfo" id="bnrInfo">PWR 88 · 金</div>
+  </div>
+
+  <div class="log-section">
+    <div class="log-header">
+      <span>// BATTLE LOG</span>
+      <span id="logCounter">0 events</span>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="result-overlay" id="result">
+    <div class="rbox">
+      <div class="rby">// BATTLE CONCLUDED</div>
+      <div class="rwin glow" id="rwin">VICTORY</div>
+      <div class="rname" id="rname">TESSERA</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Pet data =====
+const pets = {
+  tessera: {
+    name: 'TESSERA',
+    title: '尽调炼狱的执灯人',
+    rarity: 'SSR',
+    class: '金融术士',
+    elements: ['金', '暗'],
+    maxHp: 320,
+    hp: 320,
+    atk: 82, def: 94, spd: 70, int: 96, luk: 67,
+    skills: [
+      { name: 'Look-Ahead Banishment', element: '金', power: 88, type: 'ult' },
+      { name: 'Carry 三十陷阱', element: '金', power: 86, type: 'main' },
+      { name: '备付金浮存术', element: '金', power: 84, type: 'std', heal: 0.15 },
+      { name: '英中信息套利', element: '暗', power: 78, type: 'std' }
+    ]
+  },
+  aether: {
+    name: 'AETHER-7',
+    title: '递归调试者',
+    rarity: 'SR',
+    class: '代码骑士',
+    elements: ['土'],
+    maxHp: 280,
+    hp: 280,
+    atk: 76, def: 72, spd: 85, int: 80, luk: 75,
+    skills: [
+      { name: 'Stack Overflow Strike', element: '土', power: 90, type: 'ult' },
+      { name: 'Null Pointer Pierce', element: '土', power: 82, type: 'main' },
+      { name: 'Hot Reload', element: '土', power: 70, type: 'std', heal: 0.18 },
+      { name: 'Recursive Trace', element: '土', power: 74, type: 'std' }
+    ]
+  }
+};
+
+// ===== Element matchup =====
+// 火→土, 土→雷, 雷→水, 水→暗, 暗→火
+// Tessera 有 金/暗, 暗→火 (irrelevant here)
+// Aether 是 土, 土→雷 (irrelevant)
+// 这里简化: 金 vs 土 = 中性. 暗 vs 土 = 中性.
+// 为了让对战有看点, 加一条: 金的元素能针对"工程派系"(碰巧是 code 阵营), 给 1.15× buff
+function elementMultiplier(atkEl, defEls) {
+  const counters = {
+    '火': ['土'], '土': ['雷'], '雷': ['水'], '水': ['暗'], '暗': ['火'],
+    '金': ['土'] // 金克工程, 资本压工程派
+  };
+  if (counters[atkEl] && defEls.some(e => counters[atkEl].includes(e))) return 1.4;
+  if (counters[defEls[0]] && counters[defEls[0]].includes(atkEl)) return 0.7;
+  return 1.0;
+}
+
+// ===== Battle engine =====
+let speed = 1;
+let battleRunning = false;
+let battleLog = [];
+
+function delay(ms) {
+  return new Promise(r => setTimeout(r, ms / speed));
+}
+
+function calcDamage(attacker, defender, skill) {
+  const elMult = elementMultiplier(skill.element, defender.elements);
+  // Crit chance based on luk
+  const crit = Math.random() * 100 < (attacker.luk / 4 + 5);
+  const critMult = crit ? 1.7 : 1.0;
+  // Variance
+  const variance = 0.85 + Math.random() * 0.3;
+  const base = skill.power * (attacker.atk / 100) * 2.4;
+  const reduction = 100 / (100 + defender.def);
+  let dmg = Math.round(base * elMult * critMult * variance * reduction);
+  return { dmg, crit, elMult };
+}
+
+function chooseSkill(actor, opponent) {
+  // simple AI: low hp → maybe heal; otherwise weighted by power
+  const hpRatio = actor.hp / actor.maxHp;
+  const healSkill = actor.skills.find(s => s.heal);
+  if (hpRatio < 0.35 && healSkill && Math.random() < 0.6) return healSkill;
+  // weighted random by power
+  const pool = actor.skills.filter(s => !s.heal || hpRatio < 0.7);
+  const weights = pool.map(s => s.power);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < pool.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return pool[i];
+  }
+  return pool[0];
+}
+
+function logEvent(text, cls = '') {
+  const el = document.getElementById('log');
+  const p = document.createElement('p');
+  if (cls) p.className = cls;
+  p.innerHTML = text;
+  el.appendChild(p);
+  el.scrollTop = el.scrollHeight;
+  document.getElementById('logCounter').textContent = el.children.length + ' events';
+}
+
+function updateHpBar(petKey) {
+  const pet = pets[petKey === 'p1' ? 'tessera' : 'aether'];
+  const ratio = Math.max(0, pet.hp / pet.maxHp);
+  const fill = document.getElementById(petKey + 'hp');
+  fill.style.width = (ratio * 100) + '%';
+  fill.classList.toggle('warn', ratio < 0.5 && ratio >= 0.25);
+  fill.classList.toggle('danger', ratio < 0.25);
+  document.getElementById(petKey + 'num').textContent = Math.max(0, Math.round(pet.hp)) + ' / ' + pet.maxHp;
+}
+
+async function showSkillBanner(actorName, skill) {
+  const banner = document.getElementById('banner');
+  document.getElementById('bnrBy').textContent = actorName + ' USES';
+  document.getElementById('bnrName').textContent = skill.name;
+  document.getElementById('bnrInfo').textContent = `PWR ${skill.power} · ${skill.element}${skill.type === 'ult' ? ' · ULT' : ''}`;
+  banner.classList.remove('show');
+  void banner.offsetWidth;
+  banner.classList.add('show');
+  await delay(1100);
+}
+
+async function showDamage(targetEl, dmg, crit) {
+  const pop = document.getElementById('dmgPop');
+  pop.textContent = '-' + dmg + (crit ? '!' : '');
+  pop.classList.toggle('crit', crit);
+  // position over target
+  const rect = targetEl.getBoundingClientRect();
+  const arenaRect = document.getElementById('arena').getBoundingClientRect();
+  pop.style.left = (rect.left - arenaRect.left + rect.width / 2) + 'px';
+  pop.style.top = (rect.top - arenaRect.top + 50) + 'px';
+  pop.style.transform = 'translateX(-50%)';
+  pop.classList.remove('show');
+  void pop.offsetWidth;
+  pop.classList.add('show');
+}
+
+async function executeTurn(actorKey, opponentKey, round) {
+  const actor = pets[actorKey];
+  const opponent = pets[opponentKey];
+  const actorElId = actorKey === 'tessera' ? 'p1' : 'p2';
+  const oppElId = opponentKey === 'tessera' ? 'p1' : 'p2';
+  const actorEl = document.getElementById(actorElId);
+  const oppEl = document.getElementById(oppElId);
+  const hlClass = actorKey === 'tessera' ? 'hl-tessera' : 'hl-aether';
+  const oppHlClass = opponentKey === 'tessera' ? 'hl-tessera' : 'hl-aether';
+
+  actorEl.classList.add('acting');
+  await delay(300);
+
+  const skill = chooseSkill(actor, opponent);
+
+  // Heal branch
+  if (skill.heal) {
+    const healAmt = Math.round(actor.maxHp * skill.heal);
+    actor.hp = Math.min(actor.maxHp, actor.hp + healAmt);
+    logEvent(`<span class="prompt">▸</span> <span class="${hlClass}">${actor.name}</span> 释放 <span class="amber">${skill.name}</span>`);
+    await showSkillBanner(actor.name, skill);
+    logEvent(`<span class="prompt">→</span> 回复 <span class="green">+${healAmt}</span> HP · 隐含收益持续注入`);
+    updateHpBar(actorElId);
+    actorEl.classList.remove('acting');
+    await delay(600);
+    return;
+  }
+
+  logEvent(`<span class="prompt">▸</span> <span class="${hlClass}">${actor.name}</span> 释放 <span class="amber">${skill.name}</span> <span class="dim">[${skill.element}]</span>`);
+  await showSkillBanner(actor.name, skill);
+
+  const { dmg, crit, elMult } = calcDamage(actor, opponent, skill);
+  opponent.hp -= dmg;
+  oppEl.classList.add('taking-hit');
+  showDamage(oppEl, dmg, crit);
+  await delay(200);
+
+  if (crit) {
+    logEvent(`<span class="prompt">→</span> <span class="amber glow">CRITICAL HIT!</span> 命中要害`, 'crit');
+  }
+  if (elMult > 1.1) {
+    logEvent(`<span class="prompt">→</span> <span class="amber">元素压制</span> · 资本碾压工程定式 (×${elMult.toFixed(2)})`);
+  } else if (elMult < 0.9) {
+    logEvent(`<span class="prompt">→</span> <span class="dim">元素相抗</span> · 伤害削弱 (×${elMult.toFixed(2)})`);
+  }
+  logEvent(`<span class="prompt">→</span> <span class="${oppHlClass}">${opponent.name}</span> 受到 <span class="red">${dmg}</span> 点伤害`);
+  updateHpBar(oppElId);
+
+  await delay(700);
+  oppEl.classList.remove('taking-hit');
+  actorEl.classList.remove('acting');
+}
+
+async function runBattle() {
+  if (battleRunning) return;
+  battleRunning = true;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('status').textContent = 'BATTLE IN PROGRESS';
+
+  logEvent(`<span class="prompt">$</span> initializing arena...`);
+  await delay(400);
+  logEvent(`<span class="prompt">$</span> <span class="hl-tessera">TESSERA</span> [SSR/金融术士] vs <span class="hl-aether">AETHER-7</span> [SR/代码骑士]`);
+  await delay(400);
+  logEvent(`<span class="prompt">$</span> 速度对比: T(70) vs A(85) → AETHER-7 先手`);
+  await delay(800);
+
+  let round = 1;
+  while (pets.tessera.hp > 0 && pets.aether.hp > 0 && round <= 12) {
+    document.getElementById('roundNum').textContent = round;
+    logEvent(`═══ ROUND ${String(round).padStart(2, '0')} ═══`, 'round-marker');
+    await delay(300);
+
+    // determine order by speed
+    const order = pets.tessera.spd >= pets.aether.spd
+      ? ['tessera', 'aether']
+      : ['aether', 'tessera'];
+
+    for (const actorKey of order) {
+      if (pets.tessera.hp <= 0 || pets.aether.hp <= 0) break;
+      const oppKey = actorKey === 'tessera' ? 'aether' : 'tessera';
+      await executeTurn(actorKey, oppKey, round);
+      await delay(300);
+    }
+
+    round++;
+    await delay(400);
+  }
+
+  // result
+  const winner = pets.tessera.hp > 0 ? pets.tessera : pets.aether;
+  const loser = pets.tessera.hp > 0 ? pets.aether : pets.tessera;
+  logEvent(`═══ BATTLE END ═══`, 'round-marker');
+  logEvent(`<span class="prompt">★</span> <span class="green glow">${winner.name} 胜利!</span> 残血: ${Math.max(0, Math.round(winner.hp))}/${winner.maxHp}`, 'victory');
+
+  document.getElementById('rname').textContent = winner.name;
+  document.getElementById('result').classList.add('show');
+  document.getElementById('status').textContent = 'BATTLE CONCLUDED';
+  document.getElementById('resetBtn').disabled = false;
+
+  // mark loser fainted
+  document.getElementById(loser === pets.tessera ? 'p1' : 'p2').classList.add('fainted');
+
+  battleRunning = false;
+}
+
+function reset() {
+  pets.tessera.hp = pets.tessera.maxHp;
+  pets.aether.hp = pets.aether.maxHp;
+  updateHpBar('p1');
+  updateHpBar('p2');
+  document.getElementById('p1').classList.remove('fainted');
+  document.getElementById('p2').classList.remove('fainted');
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('logCounter').textContent = '0 events';
+  document.getElementById('roundNum').textContent = '—';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('status').textContent = 'AWAITING BATTLE';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('resetBtn').disabled = true;
+}
+
+document.getElementById('startBtn').addEventListener('click', runBattle);
+document.getElementById('resetBtn').addEventListener('click', reset);
+document.getElementById('speedBtn').addEventListener('click', (e) => {
+  speed = speed === 1 ? 2 : speed === 2 ? 4 : 1;
+  e.target.textContent = `⚡ SPEED: ${speed}×`;
+});
+</script>
+
+
+</body></html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)file:///C:/Users/dingn/Downloads/card_terminal_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Pet Arena // Terminal</title>
+<link href="./Pet Arena __ Terminal_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e0a;
+    --green: #33ff66;
+    --green-dim: #1a8033;
+    --green-faint: #0d4019;
+    --amber: #ffb000;
+    --red: #ff3355;
+    --text: #c8ffc8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #000;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 40px 20px;
+  }
+  .crt {
+    width: 1080px;
+    max-width: 100%;
+    aspect-ratio: 1080 / 1350;
+    background:
+      radial-gradient(ellipse at center, #0a1a0d 0%, #050805 90%),
+      var(--bg);
+    position: relative;
+    padding: 50px 56px;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+    overflow: hidden;
+    border: 2px solid var(--green-dim);
+    box-shadow:
+      0 0 60px rgba(51,255,102,0.15),
+      inset 0 0 80px rgba(0,0,0,0.6);
+  }
+  /* scanlines */
+  .crt::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.18) 3px,
+      rgba(0,0,0,0) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+  /* phosphor glow flicker */
+  .crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(51,255,102,0.06), transparent 70%);
+    pointer-events: none;
+    z-index: 99;
+  }
+  .glow { text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .red { color: var(--red); }
+  .dim { color: var(--green-dim); }
+
+  /* header bar */
+  .topbar {
+    border: 1px solid var(--green-dim);
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 24px;
+    background: rgba(51,255,102,0.04);
+  }
+  .topbar .blink::after {
+    content: "_";
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* title */
+  .title-block {
+    margin-bottom: 18px;
+  }
+  .label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--green-dim);
+    margin-bottom: 4px;
+  }
+  .pet-name {
+    font-family: 'VT323', monospace;
+    font-size: 84px;
+    line-height: 0.9;
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(51,255,102,0.6), 0 0 24px rgba(51,255,102,0.3);
+    letter-spacing: 0.04em;
+  }
+  .pet-title {
+    font-size: 16px;
+    color: var(--amber);
+    margin-top: 6px;
+    text-shadow: 0 0 4px currentColor;
+  }
+
+  /* metadata strip */
+  .meta-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 22px 0;
+    font-size: 11px;
+  }
+  .meta-cell {
+    border: 1px solid var(--green-faint);
+    padding: 8px 10px;
+    background: rgba(51,255,102,0.03);
+  }
+  .meta-cell .k { color: var(--green-dim); font-size: 9px; letter-spacing: 0.15em; margin-bottom: 3px; }
+  .meta-cell .v { color: var(--text); font-weight: 700; font-size: 13px; }
+  .meta-cell .v.rare { color: var(--amber); text-shadow: 0 0 6px var(--amber); }
+
+  /* ascii art */
+  .ascii-block {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--green);
+    text-align: center;
+    margin: 18px 0 14px;
+    text-shadow: 0 0 6px rgba(51,255,102,0.5);
+    white-space: pre;
+    letter-spacing: 0;
+  }
+
+  /* stats */
+  .section-header {
+    border-bottom: 1px dashed var(--green-dim);
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--green-dim);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+    row-gap: 8px;
+    margin-bottom: 22px;
+    font-size: 12px;
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat .name { width: 32px; color: var(--green); font-weight: 700; }
+  .stat .bar {
+    flex: 1;
+    height: 12px;
+    background: var(--green-faint);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat .fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+  .stat .num { width: 28px; text-align: right; color: var(--text); font-weight: 700; }
+
+  /* faction */
+  .faction-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .faction-cell {
+    flex: 1;
+    border: 1px solid var(--green-dim);
+    padding: 10px;
+    text-align: center;
+    background: rgba(51,255,102,0.03);
+    position: relative;
+  }
+  .faction-cell.dominant { border-color: var(--amber); background: rgba(255,176,0,0.06); }
+  .faction-cell .fk { font-size: 10px; letter-spacing: 0.2em; color: var(--green-dim); margin-bottom: 4px; }
+  .faction-cell.dominant .fk { color: var(--amber); }
+  .faction-cell .fv { font-size: 26px; font-weight: 800; color: var(--green); }
+  .faction-cell.dominant .fv { color: var(--amber); text-shadow: 0 0 8px var(--amber); }
+  .faction-cell .fb {
+    height: 3px;
+    background: var(--green-faint);
+    margin-top: 6px;
+    position: relative;
+  }
+  .faction-cell .fb::after {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--green);
+    width: var(--w);
+  }
+  .faction-cell.dominant .fb::after { background: var(--amber); }
+
+  /* skills */
+  .skill-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .skill {
+    border-left: 3px solid var(--green-dim);
+    padding: 8px 12px;
+    background: rgba(51,255,102,0.03);
+    font-size: 12px;
+  }
+  .skill.ult { border-left-color: var(--red); background: rgba(255,51,85,0.06); }
+  .skill.main { border-left-color: var(--amber); background: rgba(255,176,0,0.05); }
+  .skill .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .skill .sname { color: var(--text); font-weight: 700; font-size: 13px; }
+  .skill.ult .sname { color: var(--red); text-shadow: 0 0 4px var(--red); }
+  .skill.main .sname { color: var(--amber); }
+  .skill .stats-line { font-size: 10px; color: var(--green-dim); letter-spacing: 0.1em; }
+  .skill .desc { color: var(--text); opacity: 0.75; font-size: 11px; line-height: 1.4; }
+
+  /* footer */
+  .footer {
+    position: absolute;
+    bottom: 22px;
+    left: 56px;
+    right: 56px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--green-dim);
+    letter-spacing: 0.15em;
+    border-top: 1px dashed var(--green-faint);
+    padding-top: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="crt">
+  <div class="topbar">
+    <span>PET-ARENA :: v0.1.0-alpha</span>
+    <span class="blink">PROFILE LOADED</span>
+  </div>
+
+  <div class="title-block">
+    <div class="label">// DESIGNATION</div>
+    <div class="pet-name glow">TESSERA</div>
+    <div class="pet-title">尽调炼狱的执灯人</div>
+  </div>
+
+  <div class="meta-strip">
+    <div class="meta-cell">
+      <div class="k">RARITY</div>
+      <div class="v rare">★ SSR</div>
+    </div>
+    <div class="meta-cell">
+      <div class="k">CLASS</div>
+      <div class="v">金融术士</div>
+    </div>
+    <div class="meta-cell">
+      <div class="k">SUB-CLASS</div>
+      <div class="v">内容召唤师</div>
+    </div>
+    <div class="meta-cell">
+      <div class="k">ELEMENT</div>
+      <div class="v">金 / 暗</div>
+    </div>
+  </div>
+
+  <pre class="ascii-block">         .-=:=-.
+       .'  ___  '.
+      /   /   \   \
+     |   | $@$ |   |
+      \   \___/   /
+       '.       .'
+       /  \   /  \
+      | / | | | \ |
+      |/  | | |  \|
+         _|_|_|_
+        |||||||||</pre>
+
+  <div class="section-header">
+    <span>// CORE STATS</span>
+    <span>AVG 82.8</span>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><span class="name">HP</span><div class="bar"><div class="fill" style="width:88%"></div></div><span class="num">88</span></div>
+    <div class="stat"><span class="name">SPD</span><div class="bar"><div class="fill" style="width:70%"></div></div><span class="num">70</span></div>
+    <div class="stat"><span class="name">ATK</span><div class="bar"><div class="fill" style="width:82%"></div></div><span class="num">82</span></div>
+    <div class="stat"><span class="name">INT</span><div class="bar"><div class="fill" style="width:96%"></div></div><span class="num">96</span></div>
+    <div class="stat"><span class="name">DEF</span><div class="bar"><div class="fill" style="width:94%"></div></div><span class="num">94</span></div>
+    <div class="stat"><span class="name">LUK</span><div class="bar"><div class="fill" style="width:67%"></div></div><span class="num">67</span></div>
+  </div>
+
+  <div class="section-header">
+    <span>// FACTION AFFINITY</span>
+    <span>DOMINANT: COWORK</span>
+  </div>
+  <div class="faction-row">
+    <div class="faction-cell" style="--w:62%">
+      <div class="fk">CHAT</div>
+      <div class="fv">62</div>
+      <div class="fb"></div>
+    </div>
+    <div class="faction-cell dominant" style="--w:92%">
+      <div class="fk">COWORK</div>
+      <div class="fv">92</div>
+      <div class="fb"></div>
+    </div>
+    <div class="faction-cell" style="--w:71%">
+      <div class="fk">CODE</div>
+      <div class="fv">71</div>
+      <div class="fb"></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span>// SKILL MATRIX</span>
+    <span>04 / 04</span>
+  </div>
+  <div class="skill-list">
+    <div class="skill ult">
+      <div class="head">
+        <span class="sname">⚡ Look-Ahead Banishment</span>
+        <span class="stats-line">PWR 88 · 金</span>
+      </div>
+      <div class="desc">穿透 LLM 回测中的时间污染，强制对手暴露所有未来信息泄漏。</div>
+    </div>
+    <div class="skill main">
+      <div class="head">
+        <span class="sname">◆ Carry 三十陷阱</span>
+        <span class="stats-line">PWR 86 · 金</span>
+      </div>
+      <div class="desc">看穿任何 GP 偷拿的 10 个百分点；条款不公时自动放大伤害。</div>
+    </div>
+    <div class="skill">
+      <div class="head">
+        <span class="sname">▸ 备付金浮存术</span>
+        <span class="stats-line">PWR 84 · 金</span>
+      </div>
+      <div class="desc">调用 195 亿级别隔离资金，按 1.78% 隐含收益率持续回血。</div>
+    </div>
+    <div class="skill">
+      <div class="head">
+        <span class="sname">▸ 英中信息套利</span>
+        <span class="stats-line">PWR 78 · 暗</span>
+      </div>
+      <div class="desc">扫描英文区源头并即时铸成中文叙事，500–800 字斩杀。</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>// GENERATED BY CLAUDE</span>
+    <span>PET-ARENA.SYS</span>
+  </div>
+</div>
+
+
+</body></html>

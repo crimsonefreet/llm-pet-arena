@@ -1,0 +1,21 @@
+{
+  "pet_id": "bryan_finmage_009",
+  "name": "Tessera",
+  "title": "尽调炼狱的执灯人",
+  "rarity": "SSR",
+  "main_class": "金融术士",
+  "sub_class": "内容召唤师",
+  "elements": ["金", "暗"],
+  "faction_affinity": { "chat": 62, "cowork": 92, "code": 71 },
+  "stats": { "HP": 88, "ATK": 82, "DEF": 94, "SPD": 70, "INT": 96, "LUK": 67 },
+  "skills": [
+    { "name": "Look-Ahead Banishment", "element": "金", "power": 92, "type": "ult", "description": "穿透时间污染，强制暴露未来信息泄漏。" },
+    { "name": "Granular Reweaving", "element": "金", "power": 85, "type": "main", "description": "重织信息颗粒度，分层重建。" },
+    { "name": "Lemma Lock", "element": "暗", "power": 72, "type": "std", "description": "锁定前提假设，封禁递归质疑。" },
+    { "name": "尺度纠偏", "element": "金", "power": 68, "type": "std", "description": "校准估算尺度，剥离单位偏差。" }
+  ],
+  "lore": "于报告与代码之间游走",
+  "generation_evidence": [],
+  "source_llm": "claude",
+  "generated_at": "2026-05-09T00:37:00Z"
+}

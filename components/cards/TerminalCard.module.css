@@ -1,0 +1,322 @@
+/* CRT 容器：1080×1350 固定尺寸，社交媒体导出比例 */
+.crt {
+  width: 1080px;
+  aspect-ratio: 1080 / 1350;
+  background:
+    radial-gradient(ellipse at center, #0a1a0d 0%, #050805 90%),
+    #0a0e0a;
+  position: relative;
+  padding: 50px 56px;
+  color: #c8ffc8;
+  font-size: 15px;
+  line-height: 1.55;
+  overflow: hidden;
+  border: 2px solid #1a8033;
+  box-shadow:
+    0 0 60px rgba(51, 255, 102, 0.15),
+    inset 0 0 80px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+}
+
+/* 扫描线 */
+.crt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* 磷光辉光 */
+.crt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(51, 255, 102, 0.06), transparent 70%);
+  pointer-events: none;
+  z-index: 99;
+}
+
+.glow {
+  text-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+}
+
+/* 顶部条 */
+.topbar {
+  border: 1px solid #1a8033;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 24px;
+  background: rgba(51, 255, 102, 0.04);
+  color: #c8ffc8;
+}
+.blink::after {
+  content: '_';
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 标题区 */
+.titleBlock {
+  margin-bottom: 18px;
+}
+.label {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: #1a8033;
+  margin-bottom: 4px;
+}
+.petName {
+  font-family: var(--font-vt323), 'VT323', monospace;
+  font-size: 84px;
+  line-height: 0.9;
+  color: #33ff66;
+  text-shadow: 0 0 12px rgba(51, 255, 102, 0.6), 0 0 24px rgba(51, 255, 102, 0.3);
+  letter-spacing: 0.04em;
+}
+.longName {
+  font-size: 64px;
+}
+.petTitle {
+  font-size: 16px;
+  color: #ffb000;
+  margin-top: 6px;
+  text-shadow: 0 0 4px currentColor;
+}
+
+/* 元数据栏 */
+.metaStrip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 22px 0;
+  font-size: 11px;
+}
+.metaCell {
+  border: 1px solid #0d4019;
+  padding: 8px 10px;
+  background: rgba(51, 255, 102, 0.03);
+}
+.metaK {
+  color: #1a8033;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  margin-bottom: 3px;
+}
+.metaV {
+  color: #c8ffc8;
+  font-weight: 700;
+  font-size: 13px;
+}
+.metaVRare {
+  color: #ffb000;
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 0 0 6px #ffb000;
+}
+
+/* ASCII */
+.asciiBlock {
+  font-family: var(--font-vt323), 'VT323', monospace;
+  font-size: 16px;
+  line-height: 1;
+  color: #33ff66;
+  text-align: center;
+  margin: 18px 0 14px;
+  text-shadow: 0 0 6px rgba(51, 255, 102, 0.5);
+  white-space: pre;
+  letter-spacing: 0;
+}
+
+/* 段标题 */
+.sectionHeader {
+  border-bottom: 1px dashed #1a8033;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #1a8033;
+}
+
+/* stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 28px;
+  row-gap: 8px;
+  margin-bottom: 22px;
+  font-size: 12px;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.statName {
+  width: 32px;
+  color: #33ff66;
+  font-weight: 700;
+}
+.statBar {
+  flex: 1;
+  height: 12px;
+  background: #0d4019;
+  position: relative;
+  overflow: hidden;
+}
+.statFill {
+  height: 100%;
+  background: #33ff66;
+  box-shadow: 0 0 6px #33ff66;
+}
+.statNum {
+  width: 28px;
+  text-align: right;
+  color: #c8ffc8;
+  font-weight: 700;
+}
+
+/* faction */
+.factionRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.factionCell {
+  flex: 1;
+  border: 1px solid #1a8033;
+  padding: 10px;
+  text-align: center;
+  background: rgba(51, 255, 102, 0.03);
+  position: relative;
+}
+.factionCellDominant {
+  border-color: #ffb000;
+  background: rgba(255, 176, 0, 0.06);
+}
+.factionK {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: #1a8033;
+  margin-bottom: 4px;
+}
+.factionCellDominant .factionK {
+  color: #ffb000;
+}
+.factionV {
+  font-size: 26px;
+  font-weight: 800;
+  color: #33ff66;
+}
+.factionCellDominant .factionV {
+  color: #ffb000;
+  text-shadow: 0 0 8px #ffb000;
+}
+.factionBar {
+  height: 3px;
+  background: #0d4019;
+  margin-top: 6px;
+  position: relative;
+}
+.factionBar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: #33ff66;
+  width: var(--w);
+}
+.factionCellDominant .factionBar::after {
+  background: #ffb000;
+}
+
+/* skills */
+.skillList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.skill {
+  border-left: 3px solid #1a8033;
+  padding: 8px 12px;
+  background: rgba(51, 255, 102, 0.03);
+  font-size: 12px;
+}
+.skillUlt {
+  border-left-color: #ff3355;
+  background: rgba(255, 51, 85, 0.06);
+}
+.skillMain {
+  border-left-color: #ffb000;
+  background: rgba(255, 176, 0, 0.05);
+}
+.skillHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+.sName {
+  color: #c8ffc8;
+  font-weight: 700;
+  font-size: 13px;
+}
+.skillUlt .sName {
+  color: #ff3355;
+  text-shadow: 0 0 4px #ff3355;
+}
+.skillMain .sName {
+  color: #ffb000;
+}
+.statsLine {
+  font-size: 10px;
+  color: #1a8033;
+  letter-spacing: 0.1em;
+}
+.desc {
+  color: #c8ffc8;
+  opacity: 0.75;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* footer */
+.footer {
+  position: absolute;
+  bottom: 22px;
+  left: 56px;
+  right: 56px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #1a8033;
+  letter-spacing: 0.15em;
+  border-top: 1px dashed #0d4019;
+  padding-top: 10px;
+}
+
+/* preview 缩放：视口 <1100px 时按比例缩，导出走节点克隆绕开 */
+@media (max-width: 1100px) {
+  .crt {
+    transform: scale(calc((100vw - 48px) / 1080));
+    transform-origin: top left;
+    margin-bottom: calc(1350px * ((100vw - 48px) / 1080) - 1350px);
+  }
+}

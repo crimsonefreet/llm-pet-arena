@@ -312,11 +312,11 @@
   padding-top: 10px;
 }
 
-/* preview 缩放：视口 <1100px 时按比例缩，导出走节点克隆绕开 */
-@media (max-width: 1100px) {
-  .crt {
-    transform: scale(calc((100vw - 48px) / 1080));
-    transform-origin: top left;
-    margin-bottom: calc(1350px * ((100vw - 48px) / 1080) - 1350px);
-  }
+/* preview 缩放：始终启用，桌面 cap 在 0.45（视觉 486×608），导出走节点克隆绕开 */
+.crt {
+  --preview-scale: min(0.45, calc((100vw - 48px) / 1080));
+  transform: scale(var(--preview-scale));
+  transform-origin: top left;
+  margin-bottom: calc(1350px * (var(--preview-scale) - 1));
+  margin-right: calc(1080px * (var(--preview-scale) - 1));
 }

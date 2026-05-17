@@ -26,15 +26,34 @@ export function ExportButton({ targetRef, filename }: Props) {
   };
 
   return (
-    <div className="mt-4">
+    <div className="flex flex-col items-center">
       <button
         onClick={handleClick}
         disabled={busy}
-        className="border border-green-900 hover:border-green-500 px-6 py-2 text-xs uppercase tracking-widest text-green-400 disabled:opacity-40 transition-colors"
+        className="relative group border border-[var(--c-line)] bg-black/60 px-8 py-3 text-xs uppercase tracking-[0.3em] text-[var(--c-text-bright)] disabled:opacity-40 transition-all hover:border-[var(--c-amber)] hover:text-[var(--c-amber)] hover:bg-[rgba(255,176,0,0.04)] focus-visible:outline-none focus-visible:border-[var(--c-amber)]"
+        style={{ textShadow: '0 0 6px currentColor' }}
       >
-        {busy ? 'exporting...' : '↓ export png'}
+        <span
+          aria-hidden
+          className="absolute -left-px -top-px h-2 w-2 border-t border-l border-current opacity-60 group-hover:opacity-100"
+        />
+        <span
+          aria-hidden
+          className="absolute -right-px -top-px h-2 w-2 border-t border-r border-current opacity-60 group-hover:opacity-100"
+        />
+        <span
+          aria-hidden
+          className="absolute -left-px -bottom-px h-2 w-2 border-b border-l border-current opacity-60 group-hover:opacity-100"
+        />
+        <span
+          aria-hidden
+          className="absolute -right-px -bottom-px h-2 w-2 border-b border-r border-current opacity-60 group-hover:opacity-100"
+        />
+        {busy ? 'exporting · · ·' : '↓ export png'}
       </button>
-      {err && <p className="text-xs text-red-500 mt-2">⚠ {err}</p>}
+      {err && (
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[var(--c-red)] mt-2">⚠ {err}</p>
+      )}
     </div>
   );
 }

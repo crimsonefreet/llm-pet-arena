@@ -36,10 +36,10 @@ npm run build    # production build
 
 静态导出（`output: 'export'`）双部署，分别覆盖海外与国内：
 
-| 平台 | 默认 URL 形态 | 适用 |
+| 平台 | URL | 适用 |
 |---|---|---|
-| Vercel | `https://llm-pet-arena-xxx.vercel.app` | 海外用户主线（GFW 内不可达） |
-| Cloudflare Workers | `https://llm-pet-arena.<account>.workers.dev` | 国内用户主线（anycast → HK/SG 边缘） |
+| Vercel | https://llm-pet-arena.vercel.app | 海外用户主线（GFW 内不可达） |
+| Cloudflare Workers | https://llm-pet-arena.crimsonefr.workers.dev | 国内用户主线（anycast → HK/SG 边缘） |
 
 ### 首次部署
 

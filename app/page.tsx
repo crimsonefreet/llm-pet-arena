@@ -17,7 +17,7 @@ export default function Home() {
       <header className="max-w-7xl mx-auto mb-6">
         <h1 className="text-3xl font-vt text-green-500 tracking-wider"
           style={{ textShadow: '0 0 4px currentColor, 0 0 8px currentColor' }}>
-          PET ARENA
+          LLM PET ARENA
         </h1>
         <p className="text-xs text-green-900 mt-1 tracking-wider">
           // YOUR AI KNOWS YOU. NOW MEET YOUR PET.

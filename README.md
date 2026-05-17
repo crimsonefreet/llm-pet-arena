@@ -1,4 +1,4 @@
-# Pet Arena
+# LLM Pet Arena
 
 > 让你常用的 LLM 基于真实使用历史，生成一只独属于你的 AI 宠物。
 

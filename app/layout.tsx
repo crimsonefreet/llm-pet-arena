@@ -16,17 +16,17 @@ const vt323 = VT323({
 });
 
 export const metadata: Metadata = {
-  title: 'Pet Arena · Your AI knows you. Now meet your pet.',
+  title: 'LLM Pet Arena · Your AI knows you. Now meet your pet.',
   description: '让你常用的 LLM 基于真实使用历史，生成一只独属于你的 AI 宠物。',
   openGraph: {
-    title: 'Pet Arena',
+    title: 'LLM Pet Arena',
     description: 'Your AI knows you. Now meet your pet.',
     type: 'website',
-    siteName: 'Pet Arena',
+    siteName: 'LLM Pet Arena',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pet Arena',
+    title: 'LLM Pet Arena',
     description: 'Your AI knows you. Now meet your pet.',
   },
 };

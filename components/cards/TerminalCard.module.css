@@ -1,4 +1,6 @@
-/* CRT 容器：1080×1350 固定尺寸，社交媒体导出比例 */
+/* CRT 容器：1080×1350 固定尺寸，社交媒体导出比例
+   display: flex column 让 footer 用 margin-top: auto 推到底，
+   不再 position: absolute——内容多少都能自动撑住 */
 .crt {
   width: 1080px;
   aspect-ratio: 1080 / 1350;
@@ -6,6 +8,8 @@
     radial-gradient(ellipse at center, #0a1a0d 0%, #050805 90%),
     #0a0e0a;
   position: relative;
+  display: flex;
+  flex-direction: column;
   padding: 50px 56px;
   color: #c8ffc8;
   font-size: 15px;
@@ -54,8 +58,8 @@
   padding: 8px 14px;
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  margin-bottom: 24px;
+  font-size: 13px;
+  margin-bottom: 22px;
   background: rgba(51, 255, 102, 0.04);
   color: #c8ffc8;
 }
@@ -71,30 +75,31 @@
 
 /* 标题区 */
 .titleBlock {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 .label {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.25em;
   color: #1a8033;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .petName {
   font-family: var(--font-vt323), 'VT323', monospace;
-  font-size: 84px;
-  line-height: 0.9;
+  font-size: 92px;
+  line-height: 1; /* 之前 0.9 太紧，下溢的 glyph + 24px 阴影直接砸到 petTitle 上，1.0 给 line-box 留够空间 */
   color: #33ff66;
   text-shadow: 0 0 12px rgba(51, 255, 102, 0.6), 0 0 24px rgba(51, 255, 102, 0.3);
   letter-spacing: 0.04em;
 }
 .longName {
-  font-size: 64px;
+  font-size: 68px;
 }
 .petTitle {
-  font-size: 16px;
+  font-size: 20px;
   color: #ffb000;
-  margin-top: 6px;
+  margin-top: 18px; /* 必须 > shadow blur（24px）的一半 + 视觉缓冲，防 amber title 进 green shadow 下溢区 */
   text-shadow: 0 0 4px currentColor;
+  letter-spacing: 0.05em;
 }
 
 /* 元数据栏 */
@@ -102,40 +107,40 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin: 22px 0;
-  font-size: 11px;
+  margin: 18px 0 20px;
+  font-size: 12px;
 }
 .metaCell {
   border: 1px solid #0d4019;
-  padding: 8px 10px;
+  padding: 9px 11px;
   background: rgba(51, 255, 102, 0.03);
 }
 .metaK {
   color: #1a8033;
-  font-size: 9px;
-  letter-spacing: 0.15em;
+  font-size: 10px;
+  letter-spacing: 0.18em;
   margin-bottom: 3px;
 }
 .metaV {
   color: #c8ffc8;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 15px;
 }
 .metaVRare {
   color: #ffb000;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 15px;
   text-shadow: 0 0 6px #ffb000;
 }
 
 /* ASCII */
 .asciiBlock {
   font-family: var(--font-vt323), 'VT323', monospace;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   color: #33ff66;
   text-align: center;
-  margin: 18px 0 14px;
+  margin: 16px 0 14px;
   text-shadow: 0 0 6px rgba(51, 255, 102, 0.5);
   white-space: pre;
   letter-spacing: 0;
@@ -148,7 +153,7 @@
   margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   color: #1a8033;
 }
@@ -159,8 +164,8 @@
   grid-template-columns: 1fr 1fr;
   column-gap: 28px;
   row-gap: 8px;
-  margin-bottom: 22px;
-  font-size: 12px;
+  margin-bottom: 20px;
+  font-size: 13px;
 }
 .stat {
   display: flex;
@@ -168,7 +173,7 @@
   gap: 8px;
 }
 .statName {
-  width: 32px;
+  width: 34px;
   color: #33ff66;
   font-weight: 700;
 }
@@ -185,7 +190,7 @@
   box-shadow: 0 0 6px #33ff66;
 }
 .statNum {
-  width: 28px;
+  width: 30px;
   text-align: right;
   color: #c8ffc8;
   font-weight: 700;
@@ -195,12 +200,12 @@
 .factionRow {
   display: flex;
   gap: 8px;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .factionCell {
   flex: 1;
   border: 1px solid #1a8033;
-  padding: 10px;
+  padding: 10px 10px;
   text-align: center;
   background: rgba(51, 255, 102, 0.03);
   position: relative;
@@ -210,7 +215,7 @@
   background: rgba(255, 176, 0, 0.06);
 }
 .factionK {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.2em;
   color: #1a8033;
   margin-bottom: 4px;
@@ -219,7 +224,7 @@
   color: #ffb000;
 }
 .factionV {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
   color: #33ff66;
 }
@@ -251,7 +256,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .skill {
   border-left: 3px solid #1a8033;
@@ -276,7 +281,7 @@
 .sName {
   color: #c8ffc8;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
 }
 .skillUlt .sName {
   color: #ff3355;
@@ -288,33 +293,57 @@
 .statsLine {
   font-size: 10px;
   color: #1a8033;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
 }
 .desc {
   color: #c8ffc8;
-  opacity: 0.75;
+  opacity: 0.78;
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* footer */
+/* lore — inline label + 引文一行收住，靠 footer margin-top:auto 推到底部 */
+.lore {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 12px;
+  border-left: 3px solid #ffb000;
+  background: rgba(255, 176, 0, 0.04);
+}
+.loreTag {
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: #ffb000;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.loreText {
+  font-family: var(--font-vt323), 'VT323', monospace;
+  font-size: 18px;
+  line-height: 1.25;
+  color: #ffb000;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 6px rgba(255, 176, 0, 0.4);
+}
+
+/* footer — margin-top: auto 让它推到 flex column 底部，无论内容多少都贴底，不会撞 lore */
 .footer {
-  position: absolute;
-  bottom: 22px;
-  left: 56px;
-  right: 56px;
+  margin-top: auto;
+  padding-top: 10px;
   display: flex;
   justify-content: space-between;
   font-size: 10px;
   color: #1a8033;
   letter-spacing: 0.15em;
   border-top: 1px dashed #0d4019;
-  padding-top: 10px;
 }
 
-/* preview 缩放：始终启用，桌面 cap 在 0.45（视觉 486×608），导出走节点克隆绕开 */
+/* preview 缩放：桌面 cap 在 0.38（视觉 410×513），适配窄右列 col-span-5；
+   注意 1080 必须带 px，否则 calc() 结果是 length，min(0.38, length) 类型不匹配会让整个变量解析失败 */
 .crt {
-  --preview-scale: min(0.45, calc((100vw - 48px) / 1080));
+  --preview-scale: min(0.38, calc((100vw - 48px) / 1080px));
   transform: scale(var(--preview-scale));
   transform-origin: top left;
   margin-bottom: calc(1350px * (var(--preview-scale) - 1));

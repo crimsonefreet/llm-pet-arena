@@ -1,0 +1,960 @@
+/* ============================================================
+   ArcadeCard.module.css — TCG / Arcade aesthetic
+   Portrait 1080×1350px  ·  deep velvet + heavy gold
+   ============================================================ */
+/* hmr-rebuild-tick: 1 */
+
+/* ── Root card shell ───────────────────────────────────────── */
+.card {
+  position: relative;
+  width: 1080px;
+  height: 1350px;
+  border-radius: 32px;
+  overflow: hidden;
+  font-family: 'Inter', 'Söhne', system-ui, sans-serif;
+  color: #f5e9c8;
+  background: #0d1b2a;
+  box-shadow:
+    0 0 0 4px #1a0a06,
+    0 0 0 8px #d4af37,
+    0 0 0 12px #1a0a06,
+    0 0 60px rgba(212, 175, 55, 0.5),
+    0 0 120px rgba(212, 175, 55, 0.2);
+}
+
+/* ── Rarity-specific outer glow ─────────────────────────────── */
+.rarityN   { box-shadow: 0 0 0 4px #1a0a06, 0 0 0 8px #7a7a7a, 0 0 0 12px #1a0a06, 0 0 40px rgba(100,100,100,0.4); }
+.rarityR   { box-shadow: 0 0 0 4px #1a0a06, 0 0 0 8px #b87333, 0 0 0 12px #1a0a06, 0 0 50px rgba(184,115,51,0.5); }
+.raritySR  { box-shadow: 0 0 0 4px #1a0a06, 0 0 0 8px #c0c0c0, 0 0 0 12px #1a0a06, 0 0 55px rgba(192,192,192,0.5); }
+.raritySSR { box-shadow: 0 0 0 4px #1a0a06, 0 0 0 8px #d4af37, 0 0 0 12px #1a0a06, 0 0 60px rgba(212,175,55,0.55); }
+.rarityUR  {
+  box-shadow:
+    0 0 0 4px #1a0a06,
+    0 0 0 8px transparent,
+    0 0 0 12px #1a0a06,
+    0 0 80px rgba(212,175,55,0.6),
+    0 0 140px rgba(180,50,255,0.3);
+}
+
+/* UR holographic border — animated rainbow conic gradient */
+.rarityUR::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  background: conic-gradient(
+    from var(--holo-angle, 0deg),
+    #ff0080, #ff8c00, #ffe600, #00d4ff, #b44eff, #ff0080
+  );
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 50;
+  animation: holoSpin 4s linear infinite;
+  mix-blend-mode: overlay;
+}
+
+@keyframes holoSpin {
+  to { --holo-angle: 360deg; }
+}
+
+@property --holo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ── Background texture layers ──────────────────────────────── */
+.bgLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Deep velvet gradient base */
+.bgGradient {
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(212,175,55,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 80% 90%, rgba(43,10,26,0.9) 0%, transparent 70%),
+    linear-gradient(160deg, #0d1b2a 0%, #12131f 45%, #1a0a14 100%);
+}
+
+/* Subtle halftone dot texture */
+.bgDots {
+  background-image: radial-gradient(circle, rgba(212,175,55,0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Diagonal line ornament — DISABLED.
+   html2canvas 渲染 repeating-linear-gradient(-45deg) 时会错误渲染为清晰的密集水平横条。
+   page 上 opacity 0.04 几乎不可见，但 PNG 上会被放大成条纹，从根源删除以保证 export 干净。 */
+.bgLines {
+  display: none;
+}
+
+/* ── Outer ornamental frame ─────────────────────────────────── */
+.outerFrame {
+  position: absolute;
+  inset: 12px;
+  border-radius: 22px;
+  border: 3px solid transparent;
+  background:
+    linear-gradient(#0d1b2a, #0d1b2a) padding-box,
+    linear-gradient(180deg, #ffd700 0%, #b8860b 30%, #8b6914 60%, #d4af37 100%) border-box;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Inner double-rule */
+.innerFrame {
+  position: absolute;
+  inset: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(212,175,55,0.25);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Corner ornaments ───────────────────────────────────────── */
+.corners {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.corner {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+}
+
+.cornerTL { top: 18px;    left: 18px; }
+.cornerTR { top: 18px;    right: 18px; transform: scaleX(-1); }
+.cornerBL { bottom: 18px; left: 18px;  transform: scaleY(-1); }
+.cornerBR { bottom: 18px; right: 18px; transform: scale(-1); }
+
+/* ── Rarity band (top stripe below header) ──────────────────── */
+.rarityBand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  z-index: 5;
+  border-radius: 32px 32px 0 0;
+}
+
+.rarityBandN   { background: linear-gradient(90deg, #555 0%, #999 50%, #555 100%); }
+.rarityBandR   { background: linear-gradient(90deg, #7b3f1a 0%, #d4842a 50%, #7b3f1a 100%); }
+.rarityBandSR  { background: linear-gradient(90deg, #6a6a6a 0%, #e8e8e8 50%, #6a6a6a 100%); }
+.rarityBandSSR { background: linear-gradient(90deg, #8b6914 0%, #ffd700 30%, #ffe866 50%, #ffd700 70%, #8b6914 100%); }
+.rarityBandUR  {
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    #ff0080 0%, #ff8c00 17%, #ffe600 33%,
+    #00d4ff 50%, #b44eff 67%, #ff0080 100%
+  );
+  animation: bandShift 3s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes bandShift {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* ── HEADER ZONE ────────────────────────────────────────────── */
+.headerZone {
+  position: relative;
+  z-index: 10;
+  padding: 32px 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Rarity badge — gem in top-right */
+.rarityGem {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  gap: 2px;
+}
+
+.rarityGemN   { background: radial-gradient(circle at 35% 35%, #bbb, #555 80%); color: #111; border: 3px solid #888; box-shadow: 0 4px 16px rgba(0,0,0,0.8); }
+.rarityGemR   { background: radial-gradient(circle at 35% 35%, #f4a261, #7b3f1a 80%); color: #fff; border: 3px solid #d4842a; box-shadow: 0 4px 20px rgba(212,132,42,0.6); }
+.rarityGemSR  { background: radial-gradient(circle at 35% 35%, #fff, #8a8a8a 80%); color: #111; border: 3px solid #c0c0c0; box-shadow: 0 4px 24px rgba(192,192,192,0.7); }
+.rarityGemSSR { background: radial-gradient(circle at 35% 35%, #ffe866, #b8860b 80%); color: #111; border: 3px solid #ffd700; box-shadow: 0 4px 28px rgba(255,215,0,0.8), 0 0 12px rgba(255,215,0,0.4); }
+.rarityGemUR  {
+  background: conic-gradient(from 0deg, #ff0080, #ff8c00, #ffe600, #00d4ff, #b44eff, #ff0080);
+  color: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 0 30px rgba(212,175,55,0.9), 0 0 60px rgba(180,78,255,0.6);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  animation: gemPulse 2s ease-in-out infinite;
+}
+
+@keyframes gemPulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(212,175,55,0.9), 0 0 60px rgba(180,78,255,0.6); }
+  50%       { box-shadow: 0 0 50px rgba(255,255,255,0.9), 0 0 90px rgba(180,78,255,0.9); }
+}
+
+.rarityStars {
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.rarityText {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+/* ── Name banner ribbon ─────────────────────────────────────── */
+.nameBannerWrap {
+  position: relative;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+/* Ribbon shape via CSS clip-path */
+.nameBanner {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    #0d0a00 0%,
+    #3d2a00 20%,
+    #8b6914 40%,
+    #d4af37 50%,
+    #ffd700 55%,
+    #d4af37 60%,
+    #8b6914 80%,
+    #3d2a00 90%,
+    #0d0a00 100%
+  );
+  padding: 18px 100px 18px 44px;
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 50%, calc(100% - 24px) 100%, 0 100%);
+  display: flex;
+  flex-direction: column;
+  /* gap 必须够大 — .petName 的 drop-shadow + descender 会向下伸出 box ~10px
+     html2canvas 把这部分算进字符视觉边界，gap 2px 会让副标被遮 */
+  gap: 14px;
+}
+
+.nameBanner::before {
+  content: '';
+  position: absolute;
+  inset: 3px 3px 3px 3px;
+  background: linear-gradient(135deg, #1a0a00 0%, #2d1e00 30%, #1a0a00 100%);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+}
+
+.petName {
+  position: relative;
+  font-family: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
+  font-size: 72px;
+  font-weight: 700;
+  /* 不要用 line-height < 1 — html2canvas 会把 descender 裁掉并下沉 baseline */
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(180deg, #fffde0 0%, #ffd700 40%, #d4af37 70%, #8b6914 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 8px rgba(212,175,55,0.8));
+}
+
+.petTitle {
+  position: relative;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: rgba(245,233,200,0.8);
+  text-transform: uppercase;
+  padding-left: 2px;
+}
+
+/* ── Class/Element strip ────────────────────────────────────── */
+.classStrip {
+  position: relative;
+  z-index: 10;
+  margin: 0 40px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0,0,0,0.5);
+  border-left: 4px solid #d4af37;
+  border-bottom: 1px solid rgba(212,175,55,0.3);
+}
+
+.classTag {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ffd700;
+}
+
+.classTagSub {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgba(245,233,200,0.55);
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.classDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(212,175,55,0.5);
+  flex-shrink: 0;
+}
+
+.elementCrest {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.elementBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+
+/* Element color coding */
+.elementFire  { background: radial-gradient(circle at 40% 35%, #ff6b35, #8b1a1a); border-color: #ff6b35; box-shadow: 0 2px 12px rgba(255,107,53,0.7); }
+.elementWater { background: radial-gradient(circle at 40% 35%, #4fc3f7, #0d47a1); border-color: #4fc3f7; box-shadow: 0 2px 12px rgba(79,195,247,0.7); }
+.elementEarth { background: radial-gradient(circle at 40% 35%, #8d6e63, #3e2723); border-color: #a1887f; box-shadow: 0 2px 12px rgba(141,110,99,0.7); }
+.elementThunder { background: radial-gradient(circle at 40% 35%, #fff176, #f9a825); border-color: #fff176; box-shadow: 0 2px 12px rgba(249,168,37,0.8); }
+.elementDark  { background: radial-gradient(circle at 40% 35%, #7c4dff, #1a0033); border-color: #7c4dff; box-shadow: 0 2px 12px rgba(124,77,255,0.7); }
+.elementMetal { background: radial-gradient(circle at 40% 35%, #e8e8e8, #757575); border-color: #e0e0e0; box-shadow: 0 2px 16px rgba(232,232,232,0.6); }
+
+/* ── ART WINDOW ─────────────────────────────────────────────── */
+.artWindow {
+  position: relative;
+  z-index: 10;
+  margin: 12px 40px;
+  height: 340px;
+  background: linear-gradient(135deg, #050a0f 0%, #0a1525 40%, #0d0a1a 70%, #050508 100%);
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Art window inner glow frame */
+.artWindow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(212,175,55,0.15) 0%, transparent 30%, transparent 70%, rgba(212,175,55,0.1) 100%),
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(43,10,26,0.0) 0%, rgba(0,0,0,0.5) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.artContent {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 8px;
+}
+
+/* Large decorative element crest in art window */
+.artCrestLarge {
+  font-size: 120px;
+  line-height: 1.2;
+  filter: drop-shadow(0 0 30px currentColor) drop-shadow(0 0 60px currentColor);
+  opacity: 0.9;
+}
+
+.artSubtext {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(212,175,55,0.5);
+}
+
+/* Art window corner brackets */
+.artCorner {
+  position: absolute;
+  z-index: 4;
+  width: 20px;
+  height: 20px;
+}
+
+.artCornerTL {
+  top: 6px; left: 6px;
+  border-top: 2px solid #ffd700;
+  border-left: 2px solid #ffd700;
+}
+.artCornerTR {
+  top: 6px; right: 6px;
+  border-top: 2px solid #ffd700;
+  border-right: 2px solid #ffd700;
+}
+.artCornerBL {
+  bottom: 6px; left: 6px;
+  border-bottom: 2px solid #ffd700;
+  border-left: 2px solid #ffd700;
+}
+.artCornerBR {
+  bottom: 6px; right: 6px;
+  border-bottom: 2px solid #ffd700;
+  border-right: 2px solid #ffd700;
+}
+
+/* Pet ID watermark in art window */
+.artWatermark {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  z-index: 4;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(212,175,55,0.3);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── STATS ZONE ─────────────────────────────────────────────── */
+.statsZone {
+  position: relative;
+  z-index: 10;
+  margin: 0 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 20px;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 4px;
+}
+
+.sectionLabel {
+  grid-column: 1 / -1;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(212,175,55,0.6);
+  font-weight: 700;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(212,175,55,0.15);
+  margin-bottom: 4px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statKey {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: rgba(212,175,55,0.7);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.statBarTrack {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.statBarFill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8b6914, #ffd700);
+  box-shadow: 0 0 6px rgba(212,175,55,0.6);
+  transition: width 0.3s ease;
+}
+
+/* High stat glow */
+.statBarFillHigh {
+  background: linear-gradient(90deg, #d4af37, #ffe866, #ffd700);
+  box-shadow: 0 0 10px rgba(255,215,0,0.9);
+}
+
+.statNum {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #ffd700;
+  width: 26px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── FACTION BANNERS ─────────────────────────────────────────── */
+.factionZone {
+  position: relative;
+  z-index: 10;
+  margin: 6px 40px;
+  display: flex;
+  gap: 6px;
+}
+
+.factionBanner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* gem 在 box 上下方向居中 */
+  gap: 6px;
+  padding: 10px 6px;       /* 上下对称 padding */
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.factionBanner::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--faction-fill, 50%);
+  opacity: 0.25;
+  transition: height 0.3s ease;
+}
+
+/* Faction colors */
+.factionChat    { background: rgba(43,0,10,0.8);  border-color: rgba(220,38,90,0.4); }
+.factionChat::before    { background: linear-gradient(0deg, #dc265a, transparent); }
+.factionCowork  { background: rgba(0,15,43,0.8);  border-color: rgba(37,99,235,0.4); }
+.factionCowork::before  { background: linear-gradient(0deg, #2563eb, transparent); }
+.factionCode    { background: rgba(0,43,15,0.8);  border-color: rgba(16,185,129,0.4); }
+.factionCode::before    { background: linear-gradient(0deg, #10b981, transparent); }
+
+.factionDominant {
+  border-width: 2px;
+  box-shadow: 0 0 16px rgba(212,175,55,0.4);
+}
+.factionDominant.factionChat   { border-color: #dc265a; box-shadow: 0 0 16px rgba(220,38,90,0.5); }
+.factionDominant.factionCowork { border-color: #2563eb; box-shadow: 0 0 16px rgba(37,99,235,0.5); }
+.factionDominant.factionCode   { border-color: #10b981; box-shadow: 0 0 16px rgba(16,185,129,0.5); }
+
+.factionLabel {
+  position: relative;
+  z-index: 1;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245,233,200,0.55);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.factionGem {
+  position: relative;
+  z-index: 1;
+  width: 48px;       /* 32 → 48 给数字留充足空间 */
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 2px solid currentColor;
+}
+
+.factionChatGem   { background: radial-gradient(circle at 35% 35%, #ff6b9d, #8b0037); color: #ff6b9d; box-shadow: 0 2px 12px rgba(220,38,90,0.7); }
+.factionCoworkGem { background: radial-gradient(circle at 35% 35%, #60a5fa, #1e3a8a); color: #60a5fa; box-shadow: 0 2px 12px rgba(37,99,235,0.7); }
+.factionCodeGem   { background: radial-gradient(circle at 35% 35%, #6ee7b7, #065f46); color: #6ee7b7; box-shadow: 0 2px 12px rgba(16,185,129,0.7); }
+
+.factionVal {
+  /* 数字现在是 .factionGem 的子元素：用 flex justify+align center 在 gem dead-center
+     （父级 .factionGem 已是 display:flex; align-items:center; justify-content:center）
+     line-height: 1.2 + display block + 数字宽度 ≤ gem - padding，绝不溢出 */
+  display: block;
+  font-size: 20px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.factionBar {
+  /* 用户反馈"90/58/74 下面三根线" — 隐藏 progress bar，强度信息通过 .factionBanner::before 内部填充表达 */
+  display: none;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.factionBarFill {
+  height: 100%;
+  border-radius: 2px;
+}
+.factionChatFill   { background: linear-gradient(90deg, #8b0037, #dc265a); }
+.factionCoworkFill { background: linear-gradient(90deg, #1e3a8a, #2563eb); }
+.factionCodeFill   { background: linear-gradient(90deg, #065f46, #10b981); }
+
+/* ── SCROLL DIVIDER ─────────────────────────────────────────── */
+.scrollDivider {
+  position: relative;
+  z-index: 10;
+  margin: 8px 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent);
+}
+
+.dividerLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(212,175,55,0.6);
+  white-space: nowrap;
+}
+
+.dividerGlyph {
+  font-size: 14px;
+  color: #d4af37;
+  opacity: 0.7;
+}
+
+/* ── SKILL SCROLLS ──────────────────────────────────────────── */
+.skillsZone {
+  position: relative;
+  z-index: 10;
+  margin: 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.skillScroll {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(212,175,55,0.15);
+  background: rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+
+/* Ult skill — dominant, golden frame */
+.skillUlt {
+  border-color: rgba(212,175,55,0.5);
+  background: linear-gradient(135deg, rgba(43,27,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+  border-width: 2px;
+  box-shadow: 0 0 12px rgba(212,175,55,0.25), inset 0 1px 0 rgba(212,175,55,0.2);
+}
+
+.skillUlt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(212,175,55,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Main skill — silver accent */
+.skillMain {
+  border-color: rgba(192,192,192,0.35);
+  background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Std skill — muted */
+.skillStd {
+  background: rgba(0,0,0,0.35);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* Skill type icon badge */
+.skillTypeBadge {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 900;
+  border: 2px solid currentColor;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.skillTypeBadgeUlt  { background: radial-gradient(circle at 35% 35%, #ffe866, #8b6914); color: #ffd700; border-color: #ffd700; box-shadow: 0 2px 12px rgba(255,215,0,0.7); }
+.skillTypeBadgeMain { background: radial-gradient(circle at 35% 35%, #e0e0e0, #666); color: #e0e0e0; border-color: #c0c0c0; box-shadow: 0 2px 10px rgba(192,192,192,0.5); }
+.skillTypeBadgeStd  { background: rgba(30,30,40,0.8); color: rgba(245,233,200,0.5); border-color: rgba(255,255,255,0.15); }
+
+.skillBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.skillHead {
+  display: flex;
+  align-items: center; /* baseline 让中文/英文混排时 baseline 错位，center 更稳 */
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.skillName {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f5e9c8;
+  white-space: nowrap;
+  /* overflow 改 visible — 之前 overflow:hidden + 中文 descender 算偏让 html2canvas 把字下半裁掉 */
+  overflow: visible;
+  /* 给 ascender + descender 充足空间，1.4 倍 line-height 让 baseline 稳定居中 */
+  line-height: 1.4;
+  padding: 2px 0;
+}
+
+.skillUlt .skillName { color: #ffd700; }
+
+.skillMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.skillPower {
+  font-size: 15px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #ffd700;
+  letter-spacing: 0.05em;
+}
+
+.skillUlt .skillPower { font-size: 17px; color: #ffe866; text-shadow: 0 0 8px rgba(255,215,0,0.8); }
+
+.skillElement {
+  /* 元素角标 — 用 inline-flex + 固定 box + 严格 center 中文字 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 4px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.skillElemFire    { background: rgba(255,107,53,0.2); color: #ff6b35; border: 1px solid rgba(255,107,53,0.4); }
+.skillElemWater   { background: rgba(79,195,247,0.2); color: #4fc3f7; border: 1px solid rgba(79,195,247,0.4); }
+.skillElemEarth   { background: rgba(141,110,99,0.2); color: #a1887f; border: 1px solid rgba(141,110,99,0.4); }
+.skillElemThunder { background: rgba(255,241,118,0.2); color: #fff176; border: 1px solid rgba(255,241,118,0.4); }
+.skillElemDark    { background: rgba(124,77,255,0.2); color: #b39ddb; border: 1px solid rgba(124,77,255,0.4); }
+.skillElemMetal   { background: rgba(232,232,232,0.15); color: #e0e0e0; border: 1px solid rgba(232,232,232,0.3); }
+
+.skillDesc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(245,233,200,0.85);
+  letter-spacing: 0.02em;
+}
+
+/* ── LORE / FLAVOR ──────────────────────────────────────────── */
+.loreScroll {
+  position: relative;
+  z-index: 10;
+  margin: 6px 40px 0;
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.4);
+  border-top: 1px solid rgba(212,175,55,0.2);
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.loreQuote {
+  font-size: 22px;
+  line-height: 1.2;
+  color: rgba(212,175,55,0.4);
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  flex-shrink: 0;
+}
+
+.loreText {
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: rgba(245,233,200,0.65);
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  line-height: 1.4;
+}
+
+/* ── FOOTER STRIP ───────────────────────────────────────────── */
+.footerStrip {
+  position: absolute;
+  bottom: 26px;
+  left: 40px;
+  right: 40px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 4px;
+}
+
+.footerLLM {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.llmBadge {
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.llmClaude   { background: rgba(208,114,44,0.25); color: #d0722c; border: 1px solid rgba(208,114,44,0.5); }
+.llmChatgpt  { background: rgba(16,185,129,0.2);  color: #10b981; border: 1px solid rgba(16,185,129,0.4); }
+.llmGemini   { background: rgba(66,133,244,0.2);  color: #4285f4; border: 1px solid rgba(66,133,244,0.4); }
+.llmDeepseek { background: rgba(124,77,255,0.2);  color: #7c4dff; border: 1px solid rgba(124,77,255,0.4); }
+
+.footerSite {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(212,175,55,0.5);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.footerPetId {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(245,233,200,0.2);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Source LLM label ──── */
+.llmLabel {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,233,200,0.3);
+  font-weight: 600;
+}
+
+/* ── Decorative mid-rule between zones ─── */
+.midRule {
+  position: relative;
+  z-index: 10;
+  margin: 5px 40px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212,175,55,0.25) 15%,
+    rgba(212,175,55,0.5) 50%,
+    rgba(212,175,55,0.25) 85%,
+    transparent 100%
+  );
+}
+
+/* ── Pack Opened badge ──────────────────────────────────────── */
+.packBadge {
+  position: absolute;
+  top: 28px;
+  left: 40px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(0,0,0,0.75);
+  border: 1px solid rgba(212,175,55,0.35);
+  border-radius: 3px;
+}
+
+.packBadgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow: 0 0 6px #ffd700;
+  animation: packBlink 1.4s ease-in-out infinite;
+}
+
+@keyframes packBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.packBadgeText {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(212,175,55,0.8);
+}

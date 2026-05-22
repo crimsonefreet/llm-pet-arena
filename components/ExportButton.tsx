@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, type RefObject } from 'react';
-import { exportElementAsPng } from '@/lib/export/png';
+import { exportPetCardAsPng } from '@/lib/export/canvas-renderer';
+import type { Pet } from '@/lib/pet/schema';
 
 interface Props {
+  /** ArcadeCard 容器 ref（cardRef），用来定位内部 PetCreature SVG */
   targetRef: RefObject<HTMLElement | null>;
+  /** 当前 pet 对象，导出渲染时所需的所有 stat / skill / faction 数据 */
+  pet: Pet;
   filename?: string;
 }
 
-export function ExportButton({ targetRef, filename }: Props) {
+export function ExportButton({ targetRef, pet, filename }: Props) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -17,7 +21,12 @@ export function ExportButton({ targetRef, filename }: Props) {
     setBusy(true);
     setErr(null);
     try {
-      await exportElementAsPng(targetRef.current, { filename });
+      // PetCreature SVG 唯一签名：viewBox="0 0 400 340"
+      const svg = targetRef.current.querySelector(
+        'svg[viewBox="0 0 400 340"]',
+      ) as SVGElement | null;
+      const finalName = filename ?? `${pet.pet_id}.png`;
+      await exportPetCardAsPng(pet, finalName, { petCreatureSvg: svg });
     } catch (e) {
       setErr((e as Error).message);
     } finally {

@@ -41,7 +41,8 @@ export const PetSchema = z.object({
   lore: z.string().max(40).optional(),
   generation_evidence: z.array(z.string()).optional(),
   source_llm: z.enum(['claude', 'chatgpt', 'gemini', 'deepseek']),
-  generated_at: z.string().datetime(),
+  // 允许带时区偏移的 ISO 8601（如 +08:00），LLM 输出常用本地时区而非强制 UTC Z
+  generated_at: z.string().datetime({ offset: true }),
 });
 
 export type Pet = z.infer<typeof PetSchema>;

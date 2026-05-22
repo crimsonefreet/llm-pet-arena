@@ -8,43 +8,108 @@ interface Props {
   onParsed: (pet: Pet | null) => void;
 }
 
+type Phase = 'empty' | 'ok' | 'error';
+
 export function JsonPaster({ onParsed }: Props) {
+  const [phase, setPhase] = useState<Phase>('empty');
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const r = parsePetJson(e.target.value);
     if (r.ok) {
+      setPhase('ok');
       setError(null);
       onParsed(r.pet);
       return;
     }
     if (r.kind === 'empty') {
+      setPhase('empty');
       setError(null);
-      onParsed(null); // 清空状态：恢复轮播
+      onParsed(null);
       return;
     }
-    // 解析失败：不 onParsed(null)，保留上次有效 pet 让用户继续看
+    setPhase('error');
     const prefix = r.kind === 'json_error' ? '⚠ JSON' : '⚠ 字段校验';
     setError(`${prefix}: ${r.message}`);
   };
 
+  const phaseColor =
+    phase === 'ok'
+      ? 'var(--c-text-bright)'
+      : phase === 'error'
+        ? 'var(--c-red)'
+        : 'var(--c-text-dim)';
+
+  const phaseLabel = phase === 'ok' ? 'parsed' : phase === 'error' ? 'reject' : 'idle';
+
   return (
-    <div className="w-full">
-      <label className="block text-xs text-green-900 tracking-widest mb-2">
-        // PASTE PET JSON HERE
-      </label>
-      <textarea
-        onChange={handleChange}
-        rows={12}
-        spellCheck={false}
-        aria-label="paste pet json"
-        className="w-full bg-black border border-green-900 p-3 text-green-400 font-mono text-xs focus:outline-none focus:border-green-500 resize-y"
-        placeholder='Paste LLM output here — markdown fences ```json``` are OK.'
-      />
+    <div className="relative">
+      <div className="flex items-center justify-between mb-2">
+        <label
+          htmlFor="paste-pet-json-input"
+          className="text-[10px] tracking-[0.3em] text-[var(--c-text-dim)] uppercase"
+        >
+          // paste pet json here
+        </label>
+        <span
+          className="text-[10px] tracking-[0.3em] uppercase tabular-nums"
+          style={{ color: phaseColor }}
+        >
+          [{phaseLabel}]
+        </span>
+      </div>
+
+      <div
+        className="relative border bg-black/60 transition-colors"
+        style={{
+          borderColor:
+            phase === 'error'
+              ? 'var(--c-red)'
+              : phase === 'ok'
+                ? 'var(--c-line-hot)'
+                : 'var(--c-line-dim)',
+          boxShadow:
+            phase === 'ok'
+              ? '0 0 12px rgba(51, 255, 102, 0.18) inset, 0 0 12px rgba(51, 255, 102, 0.15)'
+              : phase === 'error'
+                ? '0 0 12px rgba(255, 51, 85, 0.12) inset'
+                : 'none',
+        }}
+      >
+        {/* hex address gutter */}
+        <div
+          aria-hidden
+          className="hidden sm:flex flex-col absolute left-0 top-0 bottom-0 w-10 border-r border-[var(--c-line-dim)] bg-black/50 py-3 text-[9px] leading-relaxed text-[var(--c-line-dim)] text-right pr-2 tabular-nums select-none font-mono"
+        >
+          {Array.from({ length: 16 }, (_, i) => (
+            <span key={i}>{`0x${(i * 16).toString(16).padStart(3, '0').toUpperCase()}`}</span>
+          ))}
+        </div>
+
+        <textarea
+          id="paste-pet-json-input"
+          onChange={handleChange}
+          rows={16}
+          spellCheck={false}
+          aria-label="paste pet json"
+          className="w-full bg-transparent py-3 pl-3 sm:pl-12 pr-3 text-[var(--c-text)] font-mono text-[12px] leading-relaxed focus:outline-none resize-y placeholder:text-[var(--c-line-dim)]"
+          placeholder={'paste claude output here...\n\n```json\n{ "pet_id": "...", ... }\n```\n\n— fences are tolerated, surrounding prose too'}
+        />
+      </div>
+
       {error && (
-        <pre role="alert" className="mt-2 text-xs text-red-500 whitespace-pre-wrap">
+        <pre
+          role="alert"
+          className="mt-2 text-[11px] text-[var(--c-red)] whitespace-pre-wrap tracking-wide"
+        >
           {error}
         </pre>
+      )}
+
+      {phase === 'ok' && !error && (
+        <p className="mt-2 text-[10px] tracking-[0.3em] text-[var(--c-text-bright)] uppercase">
+          ✓ rendered to the right →
+        </p>
       )}
     </div>
   );

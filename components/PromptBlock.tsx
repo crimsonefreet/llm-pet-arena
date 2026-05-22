@@ -17,41 +17,53 @@ export function PromptBlock() {
   };
 
   return (
-    <section className="border border-green-900 bg-green-500/[0.02] p-5 mb-8">
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-xs tracking-widest text-amber-500 hover:text-amber-400"
-        >
-          {expanded ? '▾' : '▸'} STEP 1 · COPY THIS PROMPT TO CLAUDE
-        </button>
-        <div className="flex items-center gap-3">
+    <div className="relative border border-[var(--c-line-dim)] bg-[var(--c-bg-surface)]">
+      {/* corner brackets (decorative) */}
+      <span aria-hidden className="absolute -left-px -top-px h-2 w-2 border-t border-l border-[var(--c-amber)]" />
+      <span aria-hidden className="absolute -right-px -top-px h-2 w-2 border-t border-r border-[var(--c-amber)]" />
+      <span aria-hidden className="absolute -left-px -bottom-px h-2 w-2 border-b border-l border-[var(--c-amber)]" />
+      <span aria-hidden className="absolute -right-px -bottom-px h-2 w-2 border-b border-r border-[var(--c-amber)]" />
+
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <button
-            onClick={handleCopy}
-            className="border border-green-900 hover:border-green-500 px-4 py-1.5 text-xs uppercase tracking-widest text-green-400"
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            className="text-[10px] tracking-[0.3em] uppercase text-[var(--c-amber)] glow-hover"
           >
-            Copy Prompt
+            {expanded ? '▾' : '▸'} STEP 1 · copy this prompt to claude
           </button>
-          {toast === 'ok' && (
-            <span role="status" className="text-xs text-green-400">
-              ✓ Copied
-            </span>
-          )}
-          {toast === 'fail' && (
-            <span role="status" className="text-xs text-red-500">
-              Failed — select manually
-            </span>
-          )}
+
+          <div className="flex items-center gap-3">
+            {toast === 'ok' && (
+              <span role="status" className="text-[10px] tracking-[0.2em] uppercase text-[var(--c-text-bright)]">
+                ✓ Copied
+              </span>
+            )}
+            {toast === 'fail' && (
+              <span role="status" className="text-[10px] tracking-[0.2em] uppercase text-[var(--c-red)]">
+                Failed — select manually
+              </span>
+            )}
+            <button
+              onClick={handleCopy}
+              className="border border-[var(--c-line)] bg-black/40 px-4 py-2 text-[11px] tracking-[0.25em] uppercase text-[var(--c-text-bright)] glow-hover hover:bg-[rgba(51,255,102,0.06)] hover:border-[var(--c-line-hot)] focus-visible:outline-none focus-visible:border-[var(--c-amber)] focus-visible:text-[var(--c-amber)]"
+            >
+              ↳ copy prompt
+            </button>
+          </div>
         </div>
+
+        <p className="text-[10px] tracking-[0.2em] text-[var(--c-text-dim)]">
+          // 1. Copy → 2. Paste in Claude → 3. Bring JSON back
+        </p>
+
+        {expanded && (
+          <pre className="mt-4 text-[11px] leading-relaxed text-[var(--c-text)] bg-black/60 border border-[var(--c-line-dim)] p-3 max-h-80 overflow-auto whitespace-pre-wrap font-mono">
+            {CLAUDE_PROMPT}
+          </pre>
+        )}
       </div>
-      <p className="text-[11px] text-green-900 tracking-wider">
-        // 1. Copy → 2. Paste in Claude → 3. Bring JSON back
-      </p>
-      {expanded && (
-        <pre className="mt-4 text-[11px] text-green-400 bg-black/40 p-3 max-h-80 overflow-auto whitespace-pre-wrap font-mono">
-          {CLAUDE_PROMPT}
-        </pre>
-      )}
-    </section>
+    </div>
   );
 }

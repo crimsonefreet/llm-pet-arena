@@ -5,7 +5,7 @@ describe('CLAUDE_PROMPT', () => {
   it('contains key data-collection sections', () => {
     expect(CLAUDE_PROMPT).toContain('recent_chats');
     expect(CLAUDE_PROMPT).toContain('conversation_search');
-    expect(CLAUDE_PROMPT).toContain('Pet Arena');
+    expect(CLAUDE_PROMPT).toContain('LLM Pet Arena');
   });
 
   it('declares pure JSON output (no markdown fence)', () => {

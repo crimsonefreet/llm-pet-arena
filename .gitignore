@@ -30,9 +30,29 @@ yarn-error.log*
 # vercel
 .vercel
 
+# cloudflare workers
+.wrangler/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
 # stash dir from scaffolding
 _pet-arena-stash/
+
+.vercel
+
+# dev logs
+dev.log
+
+# canvas-export audit artifacts (large pngs, dev-only proof of work)
+public/test-output/
+
+# experimental spikes (v-cyber / v-luxury variants — not yet greenlit)
+app/v-cyber/
+app/v-luxury/
+components/v-cyber/
+components/v-luxury/
+
+# dev helper scripts (python PIL center-test tool)
+scripts/

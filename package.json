@@ -1,5 +1,5 @@
 {
-  "name": "pet-arena",
+  "name": "llm-pet-arena",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy:vercel": "vercel --prod",
+    "deploy:cf": "next build && wrangler deploy"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
@@ -32,6 +34,7 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.5.2",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "wrangler": "^4.92.0"
   }
 }

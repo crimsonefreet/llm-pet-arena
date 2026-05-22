@@ -131,9 +131,16 @@ export function TerminalCard({ pet }: Props) {
         })}
       </div>
 
+      {pet.lore && (
+        <p className={styles.lore}>
+          <span className={styles.loreTag}>// FLAVOR ▸</span>
+          <span className={styles.loreText}>『{pet.lore}』</span>
+        </p>
+      )}
+
       <div className={styles.footer}>
         <span>// PET-ARENA.SYS</span>
-        <span>petarena.xyz</span>
+        <span>LLMPETARENA</span>
       </div>
     </div>
   );

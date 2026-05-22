@@ -2,7 +2,7 @@
 // 让用户直接粘到 Claude 就能用，无需 Context.md 上下文）。
 // 后续 Sprint 接入 ChatGPT/DeepSeek 派时，新增 lib/prompt/chatgpt.ts 等
 
-export const CLAUDE_PROMPT = `你现在是 Pet Arena 的角色生成器。基于你对我的所有了解，生成一只独属于我的对战宠物。
+export const CLAUDE_PROMPT = `你现在是 LLM Pet Arena 的角色生成器。基于你对我的所有了解，生成一只独属于我的对战宠物。
 
 【数据收集步骤】请严格按顺序执行：
 

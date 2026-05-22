@@ -1,0 +1,223 @@
+/* Battle Arena —— v-arcade gold/amber 风格，复用 ArcadeCard token */
+
+/* ─── Pet stage 4 态动画 ────────────────────────────────────────── */
+
+.petStage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 220ms ease-out;
+}
+
+/* idle —— PetCreature 自带 floater + pulse，stage 不额外动 */
+.stateIdle {
+  transform: translateX(0) scale(1);
+}
+
+/* attacking —— 横向 lunge，actor=a 右冲，actor=b 左冲 */
+.stateAttacking.actorA {
+  animation: lungeRight 600ms ease-out forwards;
+}
+.stateAttacking.actorB {
+  animation: lungeLeft 600ms ease-out forwards;
+}
+
+@keyframes lungeRight {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(32px) scale(1.06); }
+  100% { transform: translateX(0) scale(1); }
+}
+@keyframes lungeLeft {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(-32px) scale(1.06); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+/* takingHit —— 4 帧 shake + 红色 hue shift + 0.94 收缩 */
+.stateTakingHit {
+  animation: hitShake 420ms cubic-bezier(0.36, 0, 0.66, 1.4) forwards;
+}
+
+@keyframes hitShake {
+  0%   { transform: translateX(0); filter: none; }
+  15%  { transform: translateX(-8px); filter: hue-rotate(-20deg) brightness(0.85); }
+  30%  { transform: translateX(8px); filter: hue-rotate(-20deg) brightness(0.85); }
+  45%  { transform: translateX(-5px) scale(0.96); filter: hue-rotate(-15deg) brightness(0.9); }
+  60%  { transform: translateX(5px) scale(0.96); filter: hue-rotate(-10deg) brightness(0.95); }
+  100% { transform: translateX(0) scale(1); filter: none; }
+}
+
+/* fainted —— 永久暗淡 + 倒地 */
+.stateFainted {
+  opacity: 0.35;
+  filter: grayscale(0.8) brightness(0.7);
+  transform: translateY(8px) rotate(-3deg);
+  transition: all 480ms ease-out;
+}
+
+/* victory —— 金色 halo + 慢速呼吸 */
+.stateVictory {
+  animation: victoryPulse 2.4s ease-in-out infinite;
+}
+.stateVictory::before {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.28) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  animation: haloBloom 2.4s ease-in-out infinite;
+}
+
+@keyframes victoryPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+@keyframes haloBloom {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+/* ─── 减少动画偏好 ───────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .stateAttacking.actorA,
+  .stateAttacking.actorB,
+  .stateTakingHit,
+  .stateVictory {
+    animation: none;
+  }
+  .stateAttacking {
+    opacity: 0.85;
+  }
+  .stateTakingHit {
+    opacity: 0.6;
+  }
+}
+
+/* ─── HP bar ────────────────────────────────────────────────────── */
+
+.hpBar {
+  width: 100%;
+  height: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(8, 4, 14, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+.hpFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #d4af37);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  transition: width 380ms ease-out, background 280ms;
+}
+.hpFill.warn {
+  background: linear-gradient(90deg, #ffb000, #d4af37);
+  box-shadow: 0 0 8px rgba(255, 176, 0, 0.5);
+}
+.hpFill.danger {
+  background: linear-gradient(90deg, #e57373, #b34a4a);
+  box-shadow: 0 0 8px rgba(229, 115, 115, 0.5);
+}
+
+/* ─── Damage popup ──────────────────────────────────────────────── */
+
+.dmgPop {
+  position: absolute;
+  font-family: var(--font-cinzel), Cinzel, serif;
+  font-size: 56px;
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 0 0 24px rgba(255, 215, 0, 0.3);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  animation: dmgFloat 1.2s ease-out forwards;
+  z-index: 30;
+}
+.dmgPop.crit {
+  color: #ffaa00;
+  font-size: 72px;
+  text-shadow: 0 0 16px rgba(255, 170, 0, 0.8), 0 0 32px rgba(255, 170, 0, 0.4);
+}
+
+@keyframes dmgFloat {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  20% { opacity: 1; transform: translateY(-8px) scale(1.2); }
+  60% { opacity: 1; transform: translateY(-24px) scale(0.9); }
+  100% { opacity: 0; transform: translateY(-48px) scale(0.85); }
+}
+
+/* ─── Skill banner ──────────────────────────────────────────────── */
+
+.skillBanner {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 28px;
+  background: rgba(8, 4, 14, 0.88);
+  border: 1px solid rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.3);
+  font-family: var(--font-cinzel), Cinzel, serif;
+  font-size: 22px;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  letter-spacing: 0.05em;
+  z-index: 25;
+  pointer-events: none;
+  animation: bannerSlide 1100ms ease-out;
+}
+
+@keyframes bannerSlide {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+/* ─── VS block ──────────────────────────────────────────────────── */
+
+.vsBlock {
+  font-family: var(--font-cinzel), Cinzel, serif;
+  font-weight: 800;
+  font-size: 64px;
+  color: #ffd700;
+  text-shadow: 0 0 16px rgba(255, 215, 0, 0.4), 0 0 32px rgba(255, 215, 0, 0.2);
+  letter-spacing: 0.05em;
+}
+
+.roundMarker {
+  font-family: var(--font-cinzel), Cinzel, serif;
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.7);
+}
+
+/* ─── Battle log ────────────────────────────────────────────────── */
+
+.log {
+  height: 180px;
+  overflow-y: auto;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #f5e9c8;
+  padding: 12px 14px;
+  background: rgba(8, 4, 14, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.4) transparent;
+}
+.log::-webkit-scrollbar { width: 6px; }
+.log::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.4); border-radius: 3px; }
+.logLineRound { color: #ffd700; font-weight: 700; letter-spacing: 0.2em; }
+.logLineSkill { color: #ffe082; }
+.logLineDamage { color: #f5e9c8; }
+.logLineCrit { color: #ffaa00; font-weight: 700; }
+.logLineFaint { color: rgba(212, 175, 55, 0.7); font-style: italic; }
+.logLineEnd { color: #ffd700; font-weight: 800; letter-spacing: 0.3em; }

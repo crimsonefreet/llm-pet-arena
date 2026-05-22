@@ -232,6 +232,28 @@ export default function Home() {
                   >
                     out · 1080 × 1350 · png · 2× scale
                   </span>
+
+                  {/* ENTER ARENA —— v-arcade battle entry */}
+                  <a
+                    href="/v-arcade/battle"
+                    className="mt-3 inline-block px-6 py-2.5 text-[11px] tracking-[0.3em] uppercase"
+                    style={{
+                      color: '#0a0510',
+                      background: 'linear-gradient(135deg, #ffd700, #d4af37)',
+                      border: '1px solid #ffd700',
+                      fontWeight: 700,
+                      boxShadow: '0 0 18px rgba(212,175,55,0.4)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    ↳ ENTER THE ARENA
+                  </a>
+                  <span
+                    className="text-[10px] tracking-[0.3em] uppercase"
+                    style={{ color: 'rgba(212,175,55,0.3)' }}
+                  >
+                    challenge other pets · build a streak
+                  </span>
                 </div>
               )}
             </div>

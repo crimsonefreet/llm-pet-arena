@@ -6,11 +6,16 @@ import type { Pet } from '@/lib/pet/schema';
 
 interface Props {
   onParsed: (pet: Pet | null) => void;
+  /**
+   * 可选回调：parse 成功后触发，外层据此决定要不要 upload 到公共池
+   * 不影响 onParsed（local preview 不被 upload 流程阻塞）
+   */
+  onUploadable?: (pet: Pet) => void;
 }
 
 type Phase = 'empty' | 'ok' | 'error';
 
-export function JsonPaster({ onParsed }: Props) {
+export function JsonPaster({ onParsed, onUploadable }: Props) {
   const [phase, setPhase] = useState<Phase>('empty');
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +25,7 @@ export function JsonPaster({ onParsed }: Props) {
       setPhase('ok');
       setError(null);
       onParsed(r.pet);
+      onUploadable?.(r.pet);
       return;
     }
     if (r.kind === 'empty') {

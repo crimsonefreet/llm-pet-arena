@@ -44,6 +44,10 @@ _pet-arena-stash/
 
 # dev logs
 dev.log
+dev.*-deploy.log
+
+# wrangler local state
+.wrangler/
 
 # canvas-export audit artifacts (large pngs, dev-only proof of work)
 public/test-output/
@@ -56,3 +60,5 @@ components/v-luxury/
 
 # dev helper scripts (python PIL center-test tool)
 scripts/
+
+.vercel

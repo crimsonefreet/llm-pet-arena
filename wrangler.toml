@@ -1,6 +1,17 @@
 name = "llm-pet-arena"
-compatibility_date = "2026-05-16"
+compatibility_date = "2026-05-22"
+main = "./worker/index.ts"
 
+# 静态资产托管：Next.js static export 产物
+# run_worker_first 让 /api/* 先进入 worker script，其余 fall-through 到 assets
 [assets]
 directory = "./out"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
 not_found_handling = "single-page-application"
+
+# D1 数据库 binding —— 公共宠物池
+[[d1_databases]]
+binding = "DB"
+database_name = "petarena"
+database_id = "490df711-c4ca-4aed-ab83-425d39dc5082"

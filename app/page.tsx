@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { JsonPaster } from '@/components/JsonPaster';
 import { ArcadeCard } from '@/components/v-arcade/ArcadeCard';
 import { PromptBlock } from '@/components/PromptBlock';
@@ -8,6 +8,9 @@ import { ExportButton } from '@/components/ExportButton';
 import { ArcadeHeader } from '@/components/v-arcade/ArcadeHeader';
 import { ArcadeBackground } from '@/components/v-arcade/ArcadeBackground';
 import { PetCardBack } from '@/components/v-arcade/PetCardBack';
+import { ConsentModal } from '@/components/social/ConsentModal';
+import { uploadPet } from '@/lib/api/endpoints';
+import { hasConsent, grantConsent, setMyPetId } from '@/lib/api/storage';
 import type { Pet } from '@/lib/pet/schema';
 
 // Arcade 视觉皮肤套到 / 主入口
@@ -17,7 +20,43 @@ import type { Pet } from '@/lib/pet/schema';
 // - 工作流子组件零文件改动：靠父级 inline 覆盖 --c-* CSS 变量
 export default function Home() {
   const [pet, setPet] = useState<Pet | null>(null);
+  const [pendingUpload, setPendingUpload] = useState<Pet | null>(null);
+  const [showConsent, setShowConsent] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // 静默上传 + 写 myPetId（已有 consent 的情况）
+  const doUpload = useCallback((p: Pet) => {
+    setMyPetId(p.pet_id);
+    uploadPet(p).catch(() => {
+      // fire-and-forget：网络/服务端错误不影响本地预览，错误吞掉
+    });
+  }, []);
+
+  // JsonPaster parse 成功后的 hook：第一次出 consent modal，后续静默
+  const handleUploadable = useCallback(
+    (p: Pet) => {
+      if (hasConsent()) {
+        doUpload(p);
+      } else {
+        setPendingUpload(p);
+        setShowConsent(true);
+      }
+    },
+    [doUpload]
+  );
+
+  const onConsentAccept = useCallback(() => {
+    grantConsent();
+    if (pendingUpload) doUpload(pendingUpload);
+    setShowConsent(false);
+    setPendingUpload(null);
+  }, [doUpload, pendingUpload]);
+
+  const onConsentDecline = useCallback(() => {
+    setShowConsent(false);
+    setPendingUpload(null);
+    // 不 grantConsent —— 下次 paste 还会再问；本次 paste 留在本地
+  }, []);
 
   return (
     <div
@@ -27,6 +66,7 @@ export default function Home() {
         color: '#f5e9c8', // 默认文字 → 米黄
       }}
     >
+      <ConsentModal open={showConsent} onAccept={onConsentAccept} onDecline={onConsentDecline} />
       <ArcadeBackground />
       <ArcadeHeader
         status={pet ? `PROFILE_LOADED · ${pet.name.toUpperCase()}` : 'AWAITING_INPUT_'}
@@ -103,7 +143,7 @@ export default function Home() {
             </Chapter>
 
             <Chapter num="02" word="render" title="paste llm output">
-              <JsonPaster onParsed={setPet} />
+              <JsonPaster onParsed={setPet} onUploadable={handleUploadable} />
             </Chapter>
           </div>
 

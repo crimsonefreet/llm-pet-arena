@@ -1,5 +1,5 @@
 import type { Env } from '../types';
-import { corsFor } from '../lib/cors';
+import { corsFor, originAllowed } from '../lib/cors';
 import { stripEvidence } from '@/lib/pet/strip-evidence';
 import { PetSchema } from '@/lib/pet/schema';
 
@@ -23,10 +23,11 @@ function json(status: number, body: unknown, corsHeaders: Record<string, string>
  * - INSERT OR REPLACE（pet_id 是 PK，re-paste 覆盖）
  */
 export async function handlePostPet(req: Request, env: Env): Promise<Response> {
-  const corsHeaders = corsFor(req.headers.get('origin'));
-  if (Object.keys(corsHeaders).length === 0) {
+  const origin = req.headers.get('origin');
+  if (!originAllowed(origin)) {
     return new Response('forbidden origin', { status: 403 });
   }
+  const corsHeaders = corsFor(origin);
 
   // body size guard
   const contentLength = Number(req.headers.get('content-length') ?? '0');
@@ -72,10 +73,11 @@ export async function handlePostPet(req: Request, env: Env): Promise<Response> {
  * GET /api/pets/:id —— 获取单个 pet（invite URL unfurl）
  */
 export async function handleGetPet(req: Request, env: Env, petId: string): Promise<Response> {
-  const corsHeaders = corsFor(req.headers.get('origin'));
-  if (Object.keys(corsHeaders).length === 0) {
+  const origin = req.headers.get('origin');
+  if (!originAllowed(origin)) {
     return new Response('forbidden origin', { status: 403 });
   }
+  const corsHeaders = corsFor(origin);
 
   const row = await env.DB.prepare(`SELECT data FROM pets WHERE pet_id = ?`).bind(petId).first<{ data: string }>();
 
@@ -97,10 +99,11 @@ export async function handleGetPet(req: Request, env: Env, petId: string): Promi
  * 简单实现：ORDER BY RANDOM() LIMIT 1（D1 数据量 <100k 时性能可接受）
  */
 export async function handleRandomPet(req: Request, env: Env): Promise<Response> {
-  const corsHeaders = corsFor(req.headers.get('origin'));
-  if (Object.keys(corsHeaders).length === 0) {
+  const origin = req.headers.get('origin');
+  if (!originAllowed(origin)) {
     return new Response('forbidden origin', { status: 403 });
   }
+  const corsHeaders = corsFor(origin);
 
   const url = new URL(req.url);
   const exclude = url.searchParams.get('exclude') ?? '';

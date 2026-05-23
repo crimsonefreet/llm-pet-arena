@@ -1,5 +1,6 @@
 import type { Env } from '../types';
 import { corsFor, originAllowed } from '../lib/cors';
+import { checkRateLimit } from '../lib/ratelimit';
 import { stripEvidence } from '@/lib/pet/strip-evidence';
 import { PetSchema } from '@/lib/pet/schema';
 
@@ -28,6 +29,10 @@ export async function handlePostPet(req: Request, env: Env): Promise<Response> {
     return new Response('forbidden origin', { status: 403 });
   }
   const corsHeaders = corsFor(origin);
+
+  // Rate limit gate（早于 body parse，防滥用流量打爆 D1）
+  const rl = await checkRateLimit(req, env.PETS_POST_LIMITER, corsHeaders);
+  if (!rl.allowed) return rl.rejection!;
 
   // body size guard
   const contentLength = Number(req.headers.get('content-length') ?? '0');
@@ -79,6 +84,9 @@ export async function handleGetPet(req: Request, env: Env, petId: string): Promi
   }
   const corsHeaders = corsFor(origin);
 
+  const rl = await checkRateLimit(req, env.PETS_GET_LIMITER, corsHeaders);
+  if (!rl.allowed) return rl.rejection!;
+
   const row = await env.DB.prepare(`SELECT data FROM pets WHERE pet_id = ?`).bind(petId).first<{ data: string }>();
 
   if (!row) {
@@ -104,6 +112,9 @@ export async function handleRandomPet(req: Request, env: Env): Promise<Response>
     return new Response('forbidden origin', { status: 403 });
   }
   const corsHeaders = corsFor(origin);
+
+  const rl = await checkRateLimit(req, env.PETS_GET_LIMITER, corsHeaders);
+  if (!rl.allowed) return rl.rejection!;
 
   const url = new URL(req.url);
   const exclude = url.searchParams.get('exclude') ?? '';

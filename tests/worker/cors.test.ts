@@ -1,5 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { corsFor, handlePreflight, __ALLOWED_ORIGINS } from '@/worker/lib/cors';
+import { corsFor, handlePreflight, originAllowed, __ALLOWED_ORIGINS } from '@/worker/lib/cors';
+
+describe('cors · originAllowed', () => {
+  it('allows null origin (same-origin simple request)', () => {
+    // 浏览器同源 GET simple request 不发 Origin —— 必须放行
+    expect(originAllowed(null)).toBe(true);
+  });
+
+  it('allows whitelisted origin', () => {
+    expect(originAllowed('https://llm-pet-arena.vercel.app')).toBe(true);
+    expect(originAllowed('http://localhost:3000')).toBe(true);
+  });
+
+  it('rejects unknown origin', () => {
+    expect(originAllowed('https://evil.example')).toBe(false);
+  });
+});
 
 describe('cors · corsFor', () => {
   it('returns headers for allowed origin', () => {

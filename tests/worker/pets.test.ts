@@ -81,6 +81,18 @@ describe('POST /api/pets', () => {
     expect(db.runSpy).not.toHaveBeenCalled();
   });
 
+  it('accepts request with NO Origin header (same-origin from CF Workers domain)', async () => {
+    // 浏览器同源 GET 不发 Origin —— 此前 worker 错误地 403，是这次 hotfix 的根因
+    const text = JSON.stringify(tessera);
+    const req = new Request('https://w/api/pets', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'content-length': String(text.length) },
+      body: text,
+    });
+    const res = await handlePostPet(req, env as any);
+    expect(res.status).toBe(201);
+  });
+
   it('rejects invalid json with 400', async () => {
     const req = new Request('https://w/api/pets', {
       method: 'POST',

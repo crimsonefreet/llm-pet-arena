@@ -51,7 +51,7 @@ export function GameOverOverlay({
         animation: 'fadeIn 600ms ease-out',
       }}
     >
-      <div className="relative text-center max-w-xl">
+      <div className="relative text-center w-full max-w-4xl">
         <div
           className="text-[10px] tracking-[0.5em] uppercase mb-6"
           style={{ color: 'rgba(212, 175, 55, 0.6)' }}

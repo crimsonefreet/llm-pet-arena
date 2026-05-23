@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { JsonPaster } from '@/components/JsonPaster';
 import { ArcadeCard } from '@/components/v-arcade/ArcadeCard';
 import { PromptBlock } from '@/components/PromptBlock';
@@ -8,6 +8,9 @@ import { ExportButton } from '@/components/ExportButton';
 import { ArcadeHeader } from '@/components/v-arcade/ArcadeHeader';
 import { ArcadeBackground } from '@/components/v-arcade/ArcadeBackground';
 import { PetCardBack } from '@/components/v-arcade/PetCardBack';
+import { ConsentModal } from '@/components/social/ConsentModal';
+import { uploadPet } from '@/lib/api/endpoints';
+import { hasConsent, grantConsent, setMyPetId, getMyPetId } from '@/lib/api/storage';
 import type { Pet } from '@/lib/pet/schema';
 
 // Arcade 视觉皮肤套到 / 主入口
@@ -17,7 +20,69 @@ import type { Pet } from '@/lib/pet/schema';
 // - 工作流子组件零文件改动：靠父级 inline 覆盖 --c-* CSS 变量
 export default function Home() {
   const [pet, setPet] = useState<Pet | null>(null);
+  const [pendingUpload, setPendingUpload] = useState<Pet | null>(null);
+  const [showConsent, setShowConsent] = useState(false);
+  // 已有宠物快捷入口：mount 时从 localStorage 读，paste 成功后同步刷新
+  // —— 解决用户痛点："第二次访问主页找不到 ENTER ARENA 入口"
+  const [savedPetId, setSavedPetId] = useState<string | null>(null);
+  // 应战流程：朋友点了 ?op=<id> URL → 跳来主页 ?return=<encoded battle URL>
+  // 主页生成 pet + upload 完成后自动跳回挑战页
+  const [returnTo, setReturnTo] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // SSR-safe：mount 后从 localStorage 读 myPetId + 从 URL 取 return 参数
+  useEffect(() => {
+    setSavedPetId(getMyPetId());
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('return');
+      if (p) setReturnTo(p);
+    }
+  }, []);
+
+  // 静默上传 + 写 myPetId（已有 consent 的情况）
+  // 上传成功 / 失败都不阻塞 UI；若 returnTo 存在则跳转回挑战页
+  const doUpload = useCallback(
+    async (p: Pet) => {
+      setMyPetId(p.pet_id);
+      setSavedPetId(p.pet_id); // 同步刷新 UI，让 Welcome back 横条立即显示
+      try {
+        await uploadPet(p);
+      } catch {
+        // 上传失败仍跳转（本地有 pet，battle 页可能 fetchPet 失败 fallback）
+      }
+      // 应战流程：upload 完跳回挑战 URL
+      if (returnTo && typeof window !== 'undefined') {
+        window.location.href = returnTo;
+      }
+    },
+    [returnTo]
+  );
+
+  // JsonPaster parse 成功后的 hook：第一次出 consent modal，后续静默
+  const handleUploadable = useCallback(
+    (p: Pet) => {
+      if (hasConsent()) {
+        doUpload(p);
+      } else {
+        setPendingUpload(p);
+        setShowConsent(true);
+      }
+    },
+    [doUpload]
+  );
+
+  const onConsentAccept = useCallback(() => {
+    grantConsent();
+    if (pendingUpload) doUpload(pendingUpload);
+    setShowConsent(false);
+    setPendingUpload(null);
+  }, [doUpload, pendingUpload]);
+
+  const onConsentDecline = useCallback(() => {
+    setShowConsent(false);
+    setPendingUpload(null);
+    // 不 grantConsent —— 下次 paste 还会再问；本次 paste 留在本地
+  }, []);
 
   return (
     <div
@@ -27,12 +92,83 @@ export default function Home() {
         color: '#f5e9c8', // 默认文字 → 米黄
       }}
     >
+      <ConsentModal open={showConsent} onAccept={onConsentAccept} onDecline={onConsentDecline} />
       <ArcadeBackground />
       <ArcadeHeader
         status={pet ? `PROFILE_LOADED · ${pet.name.toUpperCase()}` : 'AWAITING_INPUT_'}
       />
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 pt-10 pb-20">
+        {/* ───────── INCOMING CHALLENGE —— 应战流程提示 ───────── */}
+        {returnTo && (
+          <section
+            className="boot-stagger mb-6 flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+            aria-label="accepting challenge"
+            style={{
+              border: '1px solid rgba(255,215,0,0.55)',
+              background:
+                'linear-gradient(90deg, rgba(255,215,0,0.12) 0%, rgba(20,12,8,0.6) 100%)',
+              boxShadow: '0 0 28px rgba(255,215,0,0.22)',
+            }}
+          >
+            <span
+              className="text-[10px] tracking-[0.4em] uppercase"
+              style={{ color: '#ffd700', textShadow: '0 0 8px rgba(255,215,0,0.4)' }}
+            >
+              ✦ incoming challenge · paste your pet to return to the arena
+            </span>
+            <span
+              className="text-[9px] tracking-[0.3em] uppercase"
+              style={{ color: 'rgba(212,175,55,0.5)' }}
+            >
+              auto-redirect on success
+            </span>
+          </section>
+        )}
+
+        {/* ───────── RETURNING COMBATANT —— 第二次访问的快捷入口 ───────── */}
+        {savedPetId && !returnTo && (
+          <section
+            className="boot-stagger mb-8 flex flex-wrap items-center justify-between gap-4 px-5 py-4"
+            aria-label="returning combatant quick entry"
+            style={{
+              border: '1px solid rgba(212,175,55,0.4)',
+              background:
+                'linear-gradient(90deg, rgba(212,175,55,0.08) 0%, rgba(20,12,8,0.45) 100%)',
+              boxShadow: '0 0 24px rgba(212,175,55,0.18)',
+            }}
+          >
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span
+                className="text-[10px] tracking-[0.4em] uppercase"
+                style={{ color: 'rgba(212,175,55,0.7)' }}
+              >
+                ✦ welcome back · arena run active
+              </span>
+              <span
+                className="text-[10px] tracking-[0.3em] uppercase tabular-nums"
+                style={{ color: 'rgba(212,175,55,0.4)' }}
+              >
+                id::{savedPetId}
+              </span>
+            </div>
+            <a
+              href="/v-arcade/battle"
+              className="glow-hover px-6 py-2.5 text-[11px] tracking-[0.3em] uppercase"
+              style={{
+                color: '#0a0510',
+                background: 'linear-gradient(135deg, #ffd700, #d4af37)',
+                border: '1px solid #ffd700',
+                fontWeight: 700,
+                boxShadow: '0 0 18px rgba(212,175,55,0.4)',
+                textDecoration: 'none',
+              }}
+            >
+              ↳ ENTER THE ARENA
+            </a>
+          </section>
+        )}
+
         {/* ───────── HERO ───────── */}
         <section className="boot-stagger grid grid-cols-12 gap-y-1 mb-8 lg:mb-10">
           <p
@@ -103,7 +239,7 @@ export default function Home() {
             </Chapter>
 
             <Chapter num="02" word="render" title="paste llm output">
-              <JsonPaster onParsed={setPet} />
+              <JsonPaster onParsed={setPet} onUploadable={handleUploadable} />
             </Chapter>
           </div>
 
@@ -192,6 +328,28 @@ export default function Home() {
                   >
                     out · 1080 × 1350 · png · 2× scale
                   </span>
+
+                  {/* ENTER ARENA —— v-arcade battle entry */}
+                  <a
+                    href="/v-arcade/battle"
+                    className="mt-3 inline-block px-6 py-2.5 text-[11px] tracking-[0.3em] uppercase"
+                    style={{
+                      color: '#0a0510',
+                      background: 'linear-gradient(135deg, #ffd700, #d4af37)',
+                      border: '1px solid #ffd700',
+                      fontWeight: 700,
+                      boxShadow: '0 0 18px rgba(212,175,55,0.4)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    ↳ ENTER THE ARENA
+                  </a>
+                  <span
+                    className="text-[10px] tracking-[0.3em] uppercase"
+                    style={{ color: 'rgba(212,175,55,0.3)' }}
+                  >
+                    challenge other pets · build a streak
+                  </span>
                 </div>
               )}
             </div>
@@ -215,7 +373,7 @@ export default function Home() {
           background: 'rgba(8, 4, 14, 0.4)',
         }}
       >
-        <span>{pet ? pet.pet_id : '· · ·'}</span>
+        <span>// public pool · evidence local-only</span>
         <span style={{ color: 'rgba(245,233,200,0.3)' }}>
           arcade · tcg · design exploration · 2026
         </span>

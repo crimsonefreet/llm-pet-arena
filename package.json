@@ -10,7 +10,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "deploy:vercel": "vercel --prod",
-    "deploy:cf": "next build && wrangler deploy"
+    "deploy:cf": "next build && wrangler d1 execute petarena --remote --file=worker/schema.sql && wrangler deploy",
+    "dev:worker": "wrangler dev --local --persist-to=.wrangler/state",
+    "db:migrate:local": "wrangler d1 execute petarena --local --file=worker/schema.sql",
+    "db:migrate:remote": "wrangler d1 execute petarena --remote --file=worker/schema.sql"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
@@ -20,6 +23,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260522.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

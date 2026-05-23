@@ -139,7 +139,7 @@ export default function ArcadePage() {
         color: 'rgba(212,175,55,0.4)',
         fontWeight: 700,
       }}>
-        <span>{TESSERA.pet_id}</span>
+        <span>// public pool · evidence local-only</span>
         <span style={{ color: 'rgba(245,233,200,0.2)' }}>
           arcade · tcg · design exploration · 2026
         </span>

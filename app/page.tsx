@@ -373,7 +373,7 @@ export default function Home() {
           background: 'rgba(8, 4, 14, 0.4)',
         }}
       >
-        <span>{pet ? pet.pet_id : '· · ·'}</span>
+        <span>// public pool · evidence local-only</span>
         <span style={{ color: 'rgba(245,233,200,0.3)' }}>
           arcade · tcg · design exploration · 2026
         </span>

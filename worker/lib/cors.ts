@@ -1,10 +1,13 @@
 // Origin 白名单 —— 拒绝陌生站点跨域调用
+// 注意：next dev 可能在 3000 / 3001 等任意空端口启动，把常用 dev 端口都放进来
 const ALLOWED = new Set<string>([
   'https://llm-pet-arena.vercel.app',
   'https://claude-pet-arena.vercel.app',
   'https://llm-pet-arena.crimsonefr.workers.dev',
   'https://petarena.xyz',
   'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
 ]);
 
 /**

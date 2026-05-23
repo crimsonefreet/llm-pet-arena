@@ -1,27 +1,34 @@
 'use client';
 
-import { useCallback, useEffect, useState, Suspense } from 'react';
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Pet } from '@/lib/pet/schema';
-import { fetchPet, fetchRandomPet } from '@/lib/api/endpoints';
+import { fetchPet, fetchRandomPet, uploadPet } from '@/lib/api/endpoints';
 import {
   getMyPetId,
+  setMyPetId,
   getStreak,
   bumpStreak,
   resetStreak as resetStreakStore,
+  hasConsent,
+  grantConsent,
 } from '@/lib/api/storage';
 import { ArcadeBackground } from '@/components/v-arcade/ArcadeBackground';
 import { ArcadeHeader } from '@/components/v-arcade/ArcadeHeader';
+import { ArcadeCard } from '@/components/v-arcade/ArcadeCard';
 import { BattleScene } from '@/components/v-arcade/BattleScene';
 import { StreakBadge } from '@/components/v-arcade/StreakBadge';
 import { GameOverOverlay } from '@/components/v-arcade/GameOverOverlay';
 import { InviteShareCard } from '@/components/social/InviteShareCard';
+import { JsonPaster } from '@/components/JsonPaster';
+import { ConsentModal } from '@/components/social/ConsentModal';
 
 type LoadState =
   | { kind: 'init' }
   | { kind: 'no-pet' }
   | { kind: 'loading' }
   | { kind: 'pool-empty' }
+  | { kind: 'challenged'; challenger: Pet } // 收到 invite URL 但还没生成 pet
   | { kind: 'error'; msg: string }
   | { kind: 'ready'; myPet: Pet; opponent: Pet };
 
@@ -35,8 +42,14 @@ export default function BattlePage() {
 
 function BattleLoading() {
   return (
-    <div className="relative min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0510' }}>
-      <p className="text-[11px] tracking-[0.4em] uppercase" style={{ color: 'rgba(212,175,55,0.5)' }}>
+    <div
+      className="relative min-h-screen flex items-center justify-center"
+      style={{ backgroundColor: '#0a0510' }}
+    >
+      <p
+        className="text-[11px] tracking-[0.4em] uppercase"
+        style={{ color: 'rgba(212,175,55,0.5)' }}
+      >
         // initializing arena...
       </p>
     </div>
@@ -54,15 +67,43 @@ function BattlePageInner() {
   const [outcome, setOutcome] = useState<'victory' | 'defeat' | 'draw' | null>(null);
   const [showInvite, setShowInvite] = useState(false);
 
+  // challenged 状态下的 consent + upload
+  const [pendingUpload, setPendingUpload] = useState<Pet | null>(null);
+  const [showConsent, setShowConsent] = useState(false);
+
   // 加载初始 pet pair
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const myId = getMyPetId();
+
+      // 路径 1：朋友收到 invite URL 但还没生成 pet → 拉 challenger，进 challenged 状态
+      if (inviteOpId && !myId) {
+        try {
+          setState({ kind: 'loading' });
+          const challenger = await fetchPet(inviteOpId);
+          if (cancelled) return;
+          setState({ kind: 'challenged', challenger });
+        } catch (e: any) {
+          if (cancelled) return;
+          setState({
+            kind: 'error',
+            msg:
+              e?.status === 404
+                ? `Challenger pet "${inviteOpId}" not found in pool`
+                : e?.error ?? 'failed to fetch challenger',
+          });
+        }
+        return;
+      }
+
+      // 路径 2：完全没 pet 且没 invite → 让用户去首页生成
       if (!myId) {
         setState({ kind: 'no-pet' });
         return;
       }
+
+      // 路径 3：有 myPet → 加载 myPet + 对手（invite 指定 / 随机）
       setState({ kind: 'loading' });
       setStreak(getStreak());
 
@@ -71,10 +112,8 @@ function BattlePageInner() {
         let opponent: Pet | null = null;
 
         if (inviteOpId) {
-          // invite 模式：固定对手
           opponent = await fetchPet(inviteOpId);
         } else {
-          // 随机模式
           try {
             opponent = await fetchRandomPet(myId);
           } catch (err) {
@@ -100,20 +139,17 @@ function BattlePageInner() {
   }, [inviteOpId]);
 
   // 战斗结束处理
-  const handleBattleEnd = useCallback(
-    (winner: 'a' | 'b' | 'draw') => {
-      if (winner === 'a') {
-        const next = bumpStreak();
-        setStreak(next);
-        setOutcome('victory');
-      } else if (winner === 'b') {
-        setOutcome('defeat');
-      } else {
-        setOutcome('draw');
-      }
-    },
-    []
-  );
+  const handleBattleEnd = useCallback((winner: 'a' | 'b' | 'draw') => {
+    if (winner === 'a') {
+      const next = bumpStreak();
+      setStreak(next);
+      setOutcome('victory');
+    } else if (winner === 'b') {
+      setOutcome('defeat');
+    } else {
+      setOutcome('draw');
+    }
+  }, []);
 
   // 下一场（仅 win 后）
   const handleNext = useCallback(async () => {
@@ -153,9 +189,52 @@ function BattlePageInner() {
     }
   }, [state]);
 
+  // ── Challenged 状态：朋友粘 JSON → 上传 → 自动开战 ────────────
+  const handleAccepted = useCallback(
+    async (myPet: Pet) => {
+      if (state.kind !== 'challenged') return;
+      setMyPetId(myPet.pet_id);
+      try {
+        await uploadPet(myPet);
+      } catch {
+        // upload 失败也继续：local 玩
+      }
+      setState({ kind: 'ready', myPet, opponent: state.challenger });
+      setBattleKey((k) => k + 1);
+    },
+    [state]
+  );
+
+  const handleUploadable = useCallback(
+    (p: Pet) => {
+      if (hasConsent()) {
+        handleAccepted(p);
+      } else {
+        setPendingUpload(p);
+        setShowConsent(true);
+      }
+    },
+    [handleAccepted]
+  );
+
+  const onConsentAccept = useCallback(() => {
+    grantConsent();
+    if (pendingUpload) handleAccepted(pendingUpload);
+    setShowConsent(false);
+    setPendingUpload(null);
+  }, [pendingUpload, handleAccepted]);
+
+  const onConsentDecline = useCallback(() => {
+    setShowConsent(false);
+    setPendingUpload(null);
+  }, []);
+
+  // ── 顶部 status ────────────────────────────────────────────────
   const headerStatus =
     state.kind === 'ready'
       ? `${state.myPet.name.toUpperCase()} vs ${state.opponent.name.toUpperCase()}`
+      : state.kind === 'challenged'
+      ? `incoming_challenge · ${state.challenger.name.toUpperCase()}`
       : state.kind === 'no-pet'
       ? 'no_pet · generate one first'
       : state.kind === 'pool-empty'
@@ -167,12 +246,11 @@ function BattlePageInner() {
       : 'awaiting_input_';
 
   return (
-    <div
-      className="relative min-h-screen"
-      style={{ backgroundColor: '#0a0510', color: '#f5e9c8' }}
-    >
+    <div className="relative min-h-screen" style={{ backgroundColor: '#0a0510', color: '#f5e9c8' }}>
       <ArcadeBackground />
       <ArcadeHeader status={headerStatus} />
+
+      <ConsentModal open={showConsent} onAccept={onConsentAccept} onDecline={onConsentDecline} />
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 pt-10 pb-16">
         {/* HERO */}
@@ -198,15 +276,15 @@ function BattlePageInner() {
               THE ARENA<span style={{ color: '#ffe082' }}>.</span>
             </h1>
           </div>
-          <StreakBadge streak={streak} />
+          {state.kind === 'ready' && <StreakBadge streak={streak} />}
         </section>
 
         {/* MAIN */}
-        {state.kind === 'init' || state.kind === 'loading' ? (
+        {(state.kind === 'init' || state.kind === 'loading') && (
           <div className="text-center py-32" style={{ color: 'rgba(212,175,55,0.6)' }}>
             <p className="text-[11px] tracking-[0.4em] uppercase">// loading combatants...</p>
           </div>
-        ) : null}
+        )}
 
         {state.kind === 'no-pet' && (
           <div className="text-center py-24">
@@ -255,10 +333,17 @@ function BattlePageInner() {
             <p className="text-sm mb-2" style={{ color: '#e57373' }}>
               ⚠ {state.msg}
             </p>
-            <p className="text-[11px] tracking-[0.3em] uppercase" style={{ color: 'rgba(212,175,55,0.5)' }}>
+            <p
+              className="text-[11px] tracking-[0.3em] uppercase"
+              style={{ color: 'rgba(212,175,55,0.5)' }}
+            >
               try refresh / check connection
             </p>
           </div>
+        )}
+
+        {state.kind === 'challenged' && (
+          <ChallengedView challenger={state.challenger} onUploadable={handleUploadable} />
         )}
 
         {state.kind === 'ready' && (
@@ -312,5 +397,153 @@ function BattlePageInner() {
         <span style={{ color: 'rgba(245,233,200,0.3)' }}>arcade · battle · 2026</span>
       </footer>
     </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
+// CHALLENGED view —— invite recipient 的内嵌应战面板
+// 左：挑战者卡片预览；右：JsonPaster + 提示
+// ────────────────────────────────────────────────────────────────
+function ChallengedView({
+  challenger,
+  onUploadable,
+}: {
+  challenger: Pet;
+  onUploadable: (p: Pet) => void;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <section className="grid grid-cols-12 gap-x-8 gap-y-10">
+      {/* CHALLENGE BANNER */}
+      <div className="col-span-12 text-center">
+        <p
+          className="text-[11px] tracking-[0.5em] uppercase mb-2"
+          style={{ color: 'rgba(212,175,55,0.6)' }}
+        >
+          ✦ INCOMING CHALLENGE ✦
+        </p>
+        <h2
+          style={{
+            fontFamily: 'var(--font-cinzel), Cinzel, serif',
+            fontWeight: 700,
+            fontSize: 'clamp(28px, 4vw, 48px)',
+            color: '#ffd700',
+            textShadow: '0 0 16px rgba(255,215,0,0.4)',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {challenger.name.toUpperCase()}
+          <span style={{ color: '#ffe082', marginLeft: 8 }}>·</span>
+          <span
+            style={{ color: 'rgba(212,175,55,0.7)', fontSize: '0.5em', letterSpacing: '0.3em' }}
+            className="ml-3"
+          >
+            CHALLENGES YOU
+          </span>
+        </h2>
+      </div>
+
+      {/* LEFT · challenger card preview */}
+      <div className="col-span-12 lg:col-span-5">
+        <p
+          className="text-[10px] tracking-[0.3em] uppercase mb-3"
+          style={{ color: 'rgba(212,175,55,0.5)' }}
+        >
+          // adversary
+        </p>
+        <div className="relative w-full max-w-[460px]" style={{ containerType: 'inline-size' }}>
+          <div
+            aria-hidden
+            className="absolute pointer-events-none"
+            style={{
+              inset: '-20px',
+              borderRadius: '32px',
+              background:
+                'radial-gradient(ellipse at center, rgba(212,175,55,0.18) 0%, transparent 70%)',
+            }}
+          />
+          <div
+            className="relative overflow-hidden"
+            style={{
+              width: '100%',
+              aspectRatio: '1080 / 1350',
+              borderRadius: '20px',
+              boxShadow: '0 30px 90px rgba(0,0,0,0.85), 0 0 40px rgba(212,175,55,0.18)',
+            }}
+          >
+            <div
+              style={{
+                width: '1080px',
+                height: '1350px',
+                transformOrigin: 'top left',
+                transform: 'scale(calc(100cqw / 1080px))',
+              }}
+            >
+              <div ref={cardRef}>
+                <ArcadeCard pet={challenger} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT · accept by pasting */}
+      <div
+        className="col-span-12 lg:col-span-7"
+        style={{
+          ['--c-line' as string]: 'rgba(212,175,55,0.3)',
+          ['--c-line-dim' as string]: 'rgba(212,175,55,0.15)',
+          ['--c-line-hot' as string]: 'rgba(255,215,0,0.55)',
+          ['--c-bg-surface' as string]: 'rgba(20,12,8,0.45)',
+          ['--c-text' as string]: '#f5e9c8',
+          ['--c-text-bright' as string]: '#ffe082',
+          ['--c-text-dim' as string]: 'rgba(212,175,55,0.5)',
+          ['--c-amber' as string]: '#ffd700',
+          ['--c-red' as string]: '#e57373',
+        }}
+      >
+        <div
+          className="text-[10px] tracking-[0.3em] uppercase mb-3"
+          style={{ color: 'rgba(212,175,55,0.5)' }}
+        >
+          // accept_challenge · paste your pet json
+        </div>
+        <h3
+          className="text-2xl mb-4"
+          style={{
+            fontFamily: 'var(--font-cinzel), Cinzel, serif',
+            fontWeight: 700,
+            color: '#ffd700',
+            letterSpacing: '0.03em',
+          }}
+        >
+          Send Your Champion
+        </h3>
+        <p className="text-[13px] mb-5 leading-relaxed" style={{ color: '#f5e9c8' }}>
+          Paste your own LLM-generated pet to accept the challenge. The arena will pit your two
+          creatures against each other immediately.
+        </p>
+
+        <JsonPaster onParsed={() => {}} onUploadable={onUploadable} />
+
+        <p
+          className="mt-4 text-[10px] tracking-[0.3em] uppercase"
+          style={{ color: 'rgba(212,175,55,0.4)' }}
+        >
+          // need a pet? &nbsp;
+          <a
+            href="/"
+            style={{
+              color: 'rgba(212,175,55,0.7)',
+              textDecoration: 'underline',
+              textUnderlineOffset: '4px',
+            }}
+          >
+            generate one on the home page →
+          </a>
+        </p>
+      </div>
+    </section>
   );
 }
